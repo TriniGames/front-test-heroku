@@ -294,7 +294,7 @@ export class MainProductionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((results) => {
         this.productionOnGoing = false;
-        console.log({ results });
+        location.reload();
       });
   }
 }
