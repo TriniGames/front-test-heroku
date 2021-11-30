@@ -1,0 +1,89 @@
+<mat-toolbar class="mat-elevation-z8">
+    <span class="fill-remaining-space">Insumos</span>
+    <button mat-icon-button class="help-button" (click)="createSupply()">
+    <mat-icon> add </mat-icon>
+    <span>Crear Insumos</span>
+  </button>
+</mat-toolbar>
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8" style="width: 100%" matSort>
+    <ng-container matColumnDef="Id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Numero</th>
+        <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="Name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Insumo</th>
+        <td mat-cell *matCellDef="let element">{{ element.Name }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="Description">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Descripcion</th>
+        <td mat-cell *matCellDef="let element">{{ element.Description }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="Stock">
+        <th mat-header-cell *matHeaderCellDef>Stock</th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.Stock }}
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+            <div style="display: flex">
+                <button mat-icon-button class="add-suply-button" (click)="editSupply(element._id)">
+          <mat-icon> edit </mat-icon>
+        </button>
+
+                <!-- <button mat-icon-button (click)="deleteSupply(element._id)">
+          <mat-icon> delete </mat-icon>
+        </button> -->
+
+                <button mat-icon-button (click)="showAddInput(i)" *ngIf="addStockInputToShow != i; else closeAdd">
+          <mat-icon style="color: green"> add </mat-icon>
+        </button>
+
+                <button mat-icon-button (click)="showRemoveInput(i)" *ngIf="removeStockInputToShow != i; else closeRemove">
+          <mat-icon style="color: red"> remove </mat-icon>
+        </button>
+
+                <ng-template #closeRemove>
+                    <button mat-icon-button (click)="showRemoveInput(-1)">
+            <mat-icon style="color: red"> close </mat-icon>
+          </button>
+                </ng-template>
+
+                <ng-template #closeAdd>
+                    <button mat-icon-button (click)="showAddInput(-1)">
+            <mat-icon style="color: green"> close </mat-icon>
+          </button>
+                </ng-template>
+
+                <mat-form-field appearance="fill" *ngIf="addStockInputToShow == i" style="font-size: 12px">
+                    <mat-label style="color: green">AGREGAR Stock</mat-label>
+                    <input matInput type="number" min="0" appOnlydigits [disabled]="savingStock" [(ngModel)]="stockToAdd" (ngModelChange)="onChangeStock($event)" />
+                    <button [ngClass]="{ 'disabled-button': savingStock }" [ngClass]="{ 'disabled-button': disableAddButton }" mat-icon-button matSuffix (click)="addStock(element._id)" [attr.aria-label]="'Agregar Stock'" [disabled]="savingStock || disableAddButton">
+            <mat-icon style="color: green">add</mat-icon>
+          </button>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" *ngIf="removeStockInputToShow == i" style="font-size: 12px">
+                    <mat-label style="color: red">ELIMINAR Stock</mat-label>
+                    <input matInput type="number" appOnlydigits min="0" [(ngModel)]="stockToDelete" (ngModelChange)="onChangeStock($event)" />
+                    <button [ngClass]="{ 'disabled-button': savingStock }" [ngClass]="{ 'disabled-button': disableAddButton }" mat-icon-button matSuffix (click)="deleteStock(element._id)" [attr.aria-label]="'Eliminar Stock'" [disabled]="savingStock || disableAddButton">
+            <mat-icon style="color: red">delete</mat-icon>
+          </button>
+                </mat-form-field>
+
+                <mat-spinner style="margin-top: 6px" *ngIf="
+            savingStock &&
+            (addStockInputToShow == i || removeStockInputToShow == i)
+          " [diameter]="30"></mat-spinner>
+            </div>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>

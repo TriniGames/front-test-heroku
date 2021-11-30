@@ -1,0 +1,8 @@
+<ul class="main-menu" [ngClass]="{'separator': separator}">
+    <li *ngFor="let nav of navigation">
+        <a [routerLink]="nav.path" routerLinkActive="selected">
+            <em [ngClass]="nav.iconClass"></em>
+            {{ nav.label }}
+        </a>
+    </li>
+</ul>

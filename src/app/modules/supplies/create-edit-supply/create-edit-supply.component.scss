@@ -1,0 +1,115 @@
+@import "../../../scss/variables.scss";
+.fill-remaining-space {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+}
+
+.form-container {
+    padding: 10px;
+}
+
+.help-container {
+    width: 30%;
+    padding: 24px;
+}
+
+.form-element {
+    padding: 5px 0px 25px 2px;
+}
+
+.button {
+    width: 30%;
+    background-color: $primary-text-color;
+    color: white;
+    font-size: 24px;
+    padding: 12px;
+}
+
+mat-form-field.mat-form-field {
+    font-size: 24px;
+    color: black;
+}
+
+mat-checkbox {
+    color: black;
+}
+
+.mat-toolbar {
+    background: $background-color;
+    color: #fff;
+}
+
+.dnone {
+    display: none;
+    transition: all 300ms;
+}
+
+.w70 {
+    transition: all 300ms;
+    width: 70%;
+}
+
+.w100 {
+    transition: all 300ms;
+    width: 100%;
+}
+
+.help-button {
+    position: absolute;
+    left: 95%;
+}
+
+.help-card {
+    border-radius: 10px;
+    background-color: $primary-text-color;
+    color: white;
+    p.title-sugest {
+        font-size: 1.2em;
+        font-weight: 600;
+        padding-top: 5px;
+    }
+    a {
+        color: saddlebrown;
+        text-decoration: none;
+    }
+}
+
+::ng-deep.mat-form-field.mat-focused {
+    .mat-form-field-label {
+        color: $primary-text-color !important;
+    }
+    .mat-form-field-ripple {
+        background-color: $primary-text-color !important;
+    }
+}
+
+::ng-deep.mat-input-element {
+    caret-color: $primary-text-color !important;
+}
+
+::ng-deep.mat-primary {
+    .mat-option.mat-selected {
+        color: $primary-text-color !important;
+    }
+    .mat-pseudo-checkbox-checked {
+        background: $primary-text-color !important;
+    }
+}
+
+mat-checkbox {
+    font-size: 16px;
+}
+
+.add-suply-button {
+    color: white;
+    background-color: $background-color;
+    margin-left: 16px;
+}
+
+.pr-14 {
+    padding-right: 14px;
+}

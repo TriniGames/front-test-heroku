@@ -1,0 +1,70 @@
+<mat-toolbar class="mat-elevation-z8">
+  <button
+    mat-icon-button
+    *ngIf="sidenav.mode === 'over'"
+    (click)="sidenav.toggle()"
+  >
+    <mat-icon *ngIf="!sidenav.opened"> menu </mat-icon>
+    <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
+  </button>
+  <span class="main-tittle">Viña Alta</span>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav="matSidenav" class="mat-elevation-z8">
+    <img
+      class="avatar mat-elevation-z8"
+      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2070&q=80"
+    />
+
+    <h4 class="name">Mayra Bargas</h4>
+    <p class="designation">Administrativa</p>
+
+    <mat-divider></mat-divider>
+
+    <button
+      mat-button
+      class="menu-button"
+      onclick="location.href='main/supplies/supplies'"
+    >
+      <mat-icon>work_outline</mat-icon>
+      <span><a href=""></a> Insumos</span>
+    </button>
+    <button
+      mat-button
+      class="menu-button"
+      onclick="location.href='main/supplies/products'"
+    >
+      <mat-icon>work</mat-icon>
+      <span><a href=""></a> Productos</span>
+    </button>
+    <button
+      mat-button
+      class="menu-button"
+      onclick="location.href='main/production/prod'"
+    >
+      <mat-icon>work</mat-icon>
+      <span><a href=""></a> Producción</span>
+    </button>
+    <button mat-button class="menu-button">
+      <mat-icon>person</mat-icon>
+      <span>Profile</span>
+    </button>
+    <button mat-button class="menu-button">
+      <mat-icon>info</mat-icon>
+      <span>About</span>
+    </button>
+
+    <mat-divider></mat-divider>
+
+    <button mat-button class="menu-button">
+      <mat-icon>help</mat-icon>
+      <span>Help</span>
+    </button>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="content" [ngClass]="sidenav.opened ? 'ml-250' : 'ml-32'">
+      <router-outlet style="width: 100%"> </router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

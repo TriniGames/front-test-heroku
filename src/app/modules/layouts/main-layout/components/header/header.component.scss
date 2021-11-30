@@ -1,0 +1,43 @@
+@import "../../../../../scss/variables.scss";
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 30px;
+    background-color: #ffffff;
+    box-shadow: $container-shadow;
+    .logo {
+        margin-left: 10px;
+        img {
+            height: 45px;
+            vertical-align: top;
+        }
+    }
+    .nav-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .nav {
+        height: 44px;
+        margin-right: 24px;
+        li {
+            width: 44px;
+            height: 44px;
+            span,
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                border-radius: 8px;
+                transition: $main-transition;
+                cursor: pointer;
+                em {
+                    font-size: 20px;
+                    color: #262425; // $color-primary
+                }
+            }
+        }
+    }
+}

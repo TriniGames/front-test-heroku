@@ -1,0 +1,34 @@
+$primary-color: #a89068;
+$primary-text-color: #c0a062;
+$secondary-color: #d7df23;
+$secondary-color-light: #d3ec84;
+$background-color: #262425;
+$link-color: #0268c5;
+$secondary-color: #d3ec84;
+$color-danger: #e61f1f;
+$color-danger-light: #ffdbdb;
+$main-text-color: #405d8a;
+$sidebar-icon-color: #6983c1;
+$sidebar-button-bg-hover: #a89068;
+$sidebar-line-separator-color: #415a94;
+$sidebar-button-height: 45px;
+$container-shadow: 0 1px 24px rgb(3 26 47 / 8%);
+$safe-height: calc(100vh - 122px);
+$main-transition: all 0.25s ease;
+// Form group field
+$inputs-font-size: 0.9rem;
+$form-group-field-label: #727272;
+$disabled-color: #8e8e8e;
+$disabled-color-label: #b1b1b1;
+$form-group-field-border-radius: 8px 8px 0 0;
+$form-group-field-transition: all 0.12s ease-out;
+$form-group-field-label-transform: translateY(-34px) translateX(-2px) scale(0.8);
+// Forms general
+$input-background-color: #efefef;
+$inputs-height: 50px;
+$inputs-font-size: 0.9rem;
+$dropdown-panel-items-hover: #213976;
+// Modal
+$modal-overlay: rgba(139, 139, 139, 72%);
+// breakpoints
+$breakpoints: ( xs: 320px, sm: 576px, md: 768px, lg: 1024px, xl: 1200px, );
