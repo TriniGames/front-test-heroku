@@ -1,8 +1,10 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { forkJoin, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { StockProduct } from 'src/app/shared/models/stock/product-supply.model';
 import { StockSupply } from 'src/app/shared/models/stock/stock-supply.model';
 import { ProductionNode } from 'src/app/shared/models/tree/producction-node.model';
@@ -17,9 +19,11 @@ import { SupplyService } from '../../supplies/services/supply.service';
 })
 export class MainProductionComponent implements OnInit, OnDestroy {
   panelOpenState = false;
-  treeProductionData: ProductionNode[] = [];
+  treeProductionBottleData: ProductionNode[] = [];
+  treeProductionDamajuanaData: ProductionNode[] = [];
   treeControl = new NestedTreeControl<ProductionNode>((node) => node.children);
-  dataSource = new MatTreeNestedDataSource<ProductionNode>();
+  dataSourceDamajuanas = new MatTreeNestedDataSource<ProductionNode>();
+  dataSourceBottles = new MatTreeNestedDataSource<ProductionNode>();
   itemsToProduce: ProductionNode[] = [];
   unsubscribe$ = new Subject();
   supplies = [];
@@ -32,7 +36,8 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   constructor(
     private readonly productService: ProductService,
     private readonly supplyService: SupplyService,
-    private readonly stockService: StockService
+    private readonly stockService: StockService,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -86,10 +91,19 @@ export class MainProductionComponent implements OnInit, OnDestroy {
       itemToProduce.quantityToProduce = e.target.value;
     }
 
-    this.dataSource.data.forEach((nodeToUpdate) => {
+    this.dataSourceDamajuanas.data.forEach((nodeToUpdate) => {
       nodeToUpdate.children!.forEach((child: ProductionNode) => {
         if (child.stock! < e.target.value) {
-          console.log('Excedido Papa');
+          this.maximumProductionPosibleExcedeed = true;
+        } else {
+          this.maximumProductionPosibleExcedeed = false;
+        }
+      });
+    });
+
+    this.dataSourceBottles.data.forEach((nodeToUpdate) => {
+      nodeToUpdate.children!.forEach((child: ProductionNode) => {
+        if (child.stock! < e.target.value) {
           this.maximumProductionPosibleExcedeed = true;
         } else {
           this.maximumProductionPosibleExcedeed = false;
@@ -99,32 +113,35 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   }
 
   generateProduction(nodeInfo: ProductionNode): void {
-    this.productionOnGoing = true;
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '600px',
+    });
 
-    const production = this.itemsToProduce.find(
-      (items) => items.index !== nodeInfo.index
-    );
-    const supplies: string[] = [];
-    const partialProducts: string[] = [];
-
-    production!.ids!.forEach((supply) => {
-      const supplyToConsume: any = this.supplies.find(
-        (p: any) => p._id === supply
-      );
-
-      if (supplyToConsume) {
-        supplies.push(supplyToConsume._id);
-      } else {
-        const partialProductToConsume: any = this.partialProducts.find(
-          (p: any) => p._id === supply
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.productionOnGoing = true;
+        const production = this.itemsToProduce.find(
+          (items) => items.index !== nodeInfo.index
         );
-
-        if (partialProductToConsume) {
-          partialProducts.push(partialProductToConsume._id);
-        }
+        const supplies: string[] = [];
+        const partialProducts: string[] = [];
+        production!.ids!.forEach((supply) => {
+          const supplyToConsume: any = this.supplies.find(
+            (p: any) => p._id === supply
+          );
+          if (supplyToConsume) {
+            supplies.push(supplyToConsume._id);
+          } else {
+            const partialProductToConsume: any = this.partialProducts.find(
+              (p: any) => p._id === supply
+            );
+            if (partialProductToConsume) {
+              partialProducts.push(partialProductToConsume._id);
+            }
+          }
+          this.consumeStock(supplies, partialProducts, production);
+        });
       }
-
-      this.consumeStock(supplies, partialProducts, production);
     });
   }
 
@@ -143,6 +160,8 @@ export class MainProductionComponent implements OnInit, OnDestroy {
               .subscribe((partialProducts) => {
                 this.supplies = supplies.supply;
                 this.partialProducts = partialProducts.product;
+
+                let bottles: any[] = [];
 
                 resp.product.forEach((product: any, index: number) => {
                   const suppliesParsed = JSON.parse(product.Supplies);
@@ -163,13 +182,24 @@ export class MainProductionComponent implements OnInit, OnDestroy {
                     };
                   });
 
-                  this.treeProductionData.push({
-                    name: product.Name,
-                    children: childrens,
-                  });
+                  //Damajuana
+                  if (product.Type == 1) {
+                    this.treeProductionDamajuanaData.push({
+                      name: product.Name,
+                      children: childrens,
+                    });
+                  } else {
+                    this.treeProductionBottleData.push({
+                      name: product.Name,
+                      children: childrens,
+                    });
+                  }
                 });
 
-                this.dataSource.data = this.treeProductionData;
+                this.dataSourceDamajuanas.data =
+                  this.treeProductionDamajuanaData;
+
+                this.dataSourceBottles.data = this.treeProductionBottleData;
               });
           });
       });

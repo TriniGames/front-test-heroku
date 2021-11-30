@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Producir</h1>
+<div mat-dialog-content>
+  <p>Esta seguro que desea producir?</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No, mejor lo pienso</button>
+  <button mat-button (click)="onConfirm()" cdkFocusInitial>
+    Si, a producir
+  </button>
+</div>

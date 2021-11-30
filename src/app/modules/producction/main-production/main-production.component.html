@@ -1,5 +1,7 @@
 <mat-toolbar class="mat-elevation-z8">
-  <span class="fill-remaining-space">Produccion</span>
+  <span class="fill-remaining-space"
+    >Produccion (Por ahora solo producir de un producto a la vez)</span
+  >
 </mat-toolbar>
 <mat-accordion>
   <mat-expansion-panel>
@@ -10,7 +12,7 @@
       </mat-panel-description>
     </mat-expansion-panel-header>
     <mat-tree
-      [dataSource]="dataSource"
+      [dataSource]="dataSourceBottles"
       [treeControl]="treeControl"
       class="example-tree"
     >
@@ -90,6 +92,75 @@
         Esto es lo que puedes producir de Damajuanas
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <p>I'm visible because I am open</p>
+    <mat-tree
+      [dataSource]="dataSourceDamajuanas"
+      [treeControl]="treeControl"
+      class="example-tree"
+    >
+      <!-- This is the tree node template for leaf nodes -->
+      <!-- There is inline padding applied to this node using styles.
+    This padding value depends on the mat-icon-button width. -->
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+        <mat-checkbox (change)="checkSuppliesToProduce($event, node)"
+          >{{ node.name }} ({{ node.stock }})</mat-checkbox
+        >
+        <mat-form-field
+          appearance="fill"
+          style="font-size: 12px; margin-left: 14px"
+        >
+          <mat-label>Cantidad a producir</mat-label>
+          <input
+            matInput
+            type="number"
+            min="0"
+            [disabled]="disableInputStock(node)"
+            (input)="evaluateStock($event, node)"
+          />
+        </mat-form-field>
+        <span
+          style="color: red; margin-left: 12px"
+          *ngIf="maximumProductionPosibleExcedeed"
+          >{{ error }}</span
+        >
+      </mat-tree-node>
+      <!-- This is the tree node template for expandable nodes -->
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+        <div class="mat-tree-node">
+          <button
+            mat-icon-button
+            matTreeNodeToggle
+            [attr.aria-label]="'Toggle ' + node.name"
+          >
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{
+                treeControl.isExpanded(node) ? "expand_more" : "chevron_right"
+              }}
+            </mat-icon>
+          </button>
+          {{ node.name }}
+          <button
+            mat-raised-button
+            style="font-size: 12px; margin-left: 12px"
+            (click)="generateProduction(node)"
+            [disabled]="disabledProductionButton(node)"
+          >
+            <span>Producir</span>
+          </button>
+          <mat-spinner
+            *ngIf="productionOnGoing"
+            style="margin-left: 12px"
+            [diameter]="25"
+          ></mat-spinner>
+        </div>
+        <!-- There is inline padding applied to this div using styles.
+          This padding value depends on the mat-icon-button width.  -->
+        <div
+          [class.example-tree-invisible]="!treeControl.isExpanded(node)"
+          role="group"
+        >
+          <ng-container matTreeNodeOutlet> </ng-container>
+        </div>
+      </mat-nested-tree-node>
+    </mat-tree>
   </mat-expansion-panel>
 </mat-accordion>
