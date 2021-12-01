@@ -1,7 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import EnumHelper from 'src/app/shared/helpers/enum.helper';
 import { ProductService } from '../services/product.service';
 import { StockService } from '../services/stock.service';
 @Component({
@@ -11,16 +15,18 @@ import { StockService } from '../services/stock.service';
 })
 export class ProductComponent implements OnInit, OnDestroy {
   unsubscribe$ = new Subject();
+  @ViewChild(MatSort, { static: false }) sort: MatSort;
   displayedColumns: string[] = [
-    'Id',
+    'Index',
     'Name',
-    'Description',
+    'TypeDescription',
     'Size',
     'Unit',
     'Stock',
     'actions',
   ];
   dataSource: any[] = [];
+  dataSourceMatTable: any;
   stockToAdd = 0;
   stockToDelete = 0;
   disableAddButton = true;
@@ -29,6 +35,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   removeStockInputToShow: number = -1;
 
   constructor(
+    private readonly liveAnnouncer: LiveAnnouncer,
     private readonly productService: ProductService,
     private readonly router: Router,
     private readonly stockService: StockService
@@ -39,12 +46,17 @@ export class ProductComponent implements OnInit, OnDestroy {
       .getProducts()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((resp) => {
-        this.dataSource = resp.product.map((prod: any) => {
+        this.dataSource = resp.product.map((prod: any, index: number) => {
           return {
             ...prod,
+            Index: index + 1,
             TipoProducto: prod.PartialProduct ? 'Parcial' : 'Final',
+            TypeDescription: EnumHelper.typeName(prod.Type),
           };
         });
+
+        this.dataSourceMatTable = new MatTableDataSource(this.dataSource);
+        this.dataSourceMatTable.sort = this.sort;
       });
   }
 
@@ -71,6 +83,15 @@ export class ProductComponent implements OnInit, OnDestroy {
           console.log(err);
         }
       );
+  }
+
+  announceSortChange(sortState: Sort) {
+    console.log(this.dataSourceMatTable);
+    if (sortState.direction) {
+      this.liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+    } else {
+      this.liveAnnouncer.announce('Sorting cleared');
+    }
   }
 
   deleteStock(id: string): void {

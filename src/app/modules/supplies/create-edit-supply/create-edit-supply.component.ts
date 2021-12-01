@@ -112,4 +112,18 @@ export class CreateEditSupplyComponent implements OnInit {
   openHelp() {
     this.helpClicked = !this.helpClicked;
   }
+
+  backToList(): void {
+    this._router.navigate(['/main/supplies/supplies']);
+  }
+
+  clearForm(): void {
+    this.formGroup.reset();
+
+    this._router.navigate([], {
+      relativeTo: this._route,
+    });
+
+    this.buttonText = 'Guardar';
+  }
 }

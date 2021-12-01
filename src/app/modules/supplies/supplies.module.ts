@@ -21,6 +21,7 @@ import { NgxsModule } from '@ngxs/store';
 import { SupplyState } from './store/supply.state';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 @NgModule({
   declarations: [
     ProductComponent,

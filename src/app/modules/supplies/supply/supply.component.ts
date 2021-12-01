@@ -1,7 +1,17 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import EnumHelper from 'src/app/shared/helpers/enum.helper';
 import { StockService } from '../services/stock.service';
 import { SupplyService } from '../services/supply.service';
 
@@ -12,13 +22,15 @@ import { SupplyService } from '../services/supply.service';
 })
 export class SupplyComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject();
+  @ViewChild(MatSort, { static: false }) sort: MatSort;
   displayedColumns: string[] = [
-    'Id',
+    'Index',
     'Name',
-    'Description',
+    'TypeDescription',
     'Stock',
     'actions',
   ];
+  dataSourceMatTable = new MatTableDataSource();
   dataSource: any[] = [];
   stockToAdd = 0;
   stockToDelete = 0;
@@ -28,6 +40,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
   removeStockInputToShow: number = -1;
 
   constructor(
+    private readonly liveAnnouncer: LiveAnnouncer,
     private readonly router: Router,
     private readonly supplyService: SupplyService,
     private readonly stockService: StockService
@@ -38,8 +51,25 @@ export class SupplyComponent implements OnInit, OnDestroy {
       .getSupplies()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((resp) => {
-        this.dataSource = resp.supply;
+        const dataSource = resp.supply.map((sup: any, index: number) => {
+          return {
+            ...sup,
+            Index: index + 1,
+            TypeDescription: EnumHelper.typeName(sup.Type),
+          };
+        });
+
+        this.dataSourceMatTable = new MatTableDataSource(dataSource);
+        this.dataSourceMatTable.sort = this.sort;
       });
+  }
+
+  announceSortChange(sortState: Sort) {
+    if (sortState.direction) {
+      this.liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+    } else {
+      this.liveAnnouncer.announce('Sorting cleared');
+    }
   }
 
   addStock(id: string): void {

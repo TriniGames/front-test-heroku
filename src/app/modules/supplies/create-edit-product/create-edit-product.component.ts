@@ -9,7 +9,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { ProductService } from '../services/product.service';
 import { GetProduct, GetSupplies, GetSupply } from '../store/supply.actions';
 import { SupplyState } from '../store/supply.state';
@@ -33,11 +33,11 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   unsubscribe$ = new Subject();
 
   constructor(
-    private _formBuilder: FormBuilder,
-    private _productService: ProductService,
-    private _route: ActivatedRoute,
-    private _router: Router,
-    private _store: Store
+    private readonly formBuilder: FormBuilder,
+    private readonly productService: ProductService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly store: Store
   ) {}
 
   ngOnInit(): void {
@@ -46,54 +46,59 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
     this.getProductType();
     this.getProduct();
 
-    this.controls('Type').valueChanges.subscribe((type) => {
-      this.changeSupplies(type);
-    });
+    this.controls('Type')
+      .valueChanges.pipe(takeUntil(this.unsubscribe$))
+      .subscribe((type) => {
+        this.changeSupplies(type);
+      });
 
-    this.controls('ShowAllSupplies').valueChanges.subscribe((showAll) => {
-      if (showAll) {
-        this.showAllSupplies();
-      }
-    });
+    this.controls('ShowAllSupplies')
+      .valueChanges.pipe(takeUntil(this.unsubscribe$))
+      .subscribe((showAll) => {
+        if (showAll) {
+          this.showAllSupplies();
+        }
+      });
   }
 
   getProduct(): void {
-    this._route.queryParams.subscribe((params) => {
-      if (params && params['id']) {
-        this._store.dispatch(new GetProduct(params['id'])).subscribe(
-          () => {
-            this.productSelected$
-              .pipe(takeUntil(this.unsubscribe$))
-              .subscribe((productSelected) => {
-                console.log({ productSelected });
-                if (productSelected) {
-                  this.formGroup.patchValue({
-                    ...productSelected,
-                    Id: productSelected._id,
-                  });
+    this.route.queryParams
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((params) => {
+        if (params && params['id']) {
+          this.store.dispatch(new GetProduct(params['id'])).subscribe(
+            () => {
+              this.productSelected$
+                .pipe(take(1))
+                .subscribe((productSelected) => {
+                  if (productSelected) {
+                    this.formGroup.patchValue({
+                      ...productSelected,
+                      Id: productSelected._id,
+                    });
 
-                  const supliesArray = this.formGroup.get(
-                    'Supplies'
-                  ) as FormArray;
+                    const supliesArray = this.formGroup.get(
+                      'Supplies'
+                    ) as FormArray;
 
-                  this.deleteSuply(0);
+                    this.deleteSuply(0);
 
-                  productSelected.Supplies.forEach((supply: any) => {
-                    supliesArray.push(
-                      this.createNewSupply(supply.SingleSupply)
-                    );
-                  });
+                    productSelected.Supplies.forEach((supply: any) => {
+                      supliesArray.push(
+                        this.createNewSupply(supply.SingleSupply)
+                      );
+                    });
 
-                  this.buttonText = 'Actualizar';
-                }
-              });
-          },
-          (err) => {
-            this._router.navigate(['main', 'supplies', 'createEditProduct']);
-          }
-        );
-      }
-    });
+                    this.buttonText = 'Actualizar';
+                  }
+                });
+            },
+            (err) => {
+              this.router.navigate(['main', 'supplies', 'createEditProduct']);
+            }
+          );
+        }
+      });
   }
 
   getProductType(): void {
@@ -105,7 +110,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   }
 
   getSupplies(): void {
-    this._store.dispatch(new GetSupplies());
+    this.store.dispatch(new GetSupplies());
 
     this.supplies$.pipe(takeUntil(this.unsubscribe$)).subscribe((supplies) => {
       if (!supplies) {
@@ -124,7 +129,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   }
 
   createForm(): void {
-    this.formGroup = this._formBuilder.group({
+    this.formGroup = this.formBuilder.group({
       Id: [null],
       Name: [null, [Validators.required]],
       Description: [null, Validators.required],
@@ -135,7 +140,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
           disabled: true,
         },
       ],
-      Supplies: this._formBuilder.array([this.createNewSupply()]),
+      Supplies: this.formBuilder.array([this.createNewSupply()]),
       PartialProduct: [false],
       Type: [null, [Validators.required]],
       ShowAllSupplies: [false],
@@ -152,16 +157,15 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.formGroup.get('Id')?.value) {
-      this._productService
+      this.productService
         .updateProduct(this.formGroup.getRawValue())
         .subscribe(() => {});
     } else {
-      this._productService
+      this.productService
         .createProduct(this.formGroup.getRawValue())
         .subscribe((productCreated) => {
-          console.log({ productCreated });
-          this._router.navigate([], {
-            relativeTo: this._route,
+          this.router.navigate([], {
+            relativeTo: this.route,
             queryParams: {
               id: productCreated._id,
             },
@@ -186,7 +190,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   }
 
   createNewSupply(supply: any = null): FormGroup {
-    return this._formBuilder.group({
+    return this.formBuilder.group({
       SingleSupply: [supply, Validators.required],
     });
   }
@@ -201,6 +205,20 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
 
   showAllSupplies(): void {
     this.supliesOptionsFiltered = this.supliesOptions;
+  }
+
+  backToList(): void {
+    this.router.navigate(['/main/supplies/supplies']);
+  }
+
+  clearForm(): void {
+    this.formGroup.reset();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+    });
+
+    this.buttonText = 'Guardar';
   }
 
   ngOnDestroy(): void {

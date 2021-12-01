@@ -21,14 +21,23 @@
   padding: 5px 0px 25px 2px;
 }
 
+.button-wrap {
+  display: flex;
+  justify-content: space-between;
+}
+
 .button {
   width: 30%;
   background-color: $primary-text-color;
   color: white;
   font-size: 24px;
   padding: 12px;
-}
 
+  &.accessory-button {
+    width: 15%;
+    background: $background-color;
+  }
+}
 mat-form-field.mat-form-field {
   font-size: 24px;
   color: black;

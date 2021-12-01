@@ -1,5 +1,5 @@
-export class EnumHelper {
-  typeName(type: string) {
+export default class EnumHelper {
+  static typeName(type: string): string {
     switch (type) {
       case '1':
         return 'Damajuana';
