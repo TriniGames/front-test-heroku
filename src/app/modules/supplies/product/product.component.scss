@@ -41,3 +41,17 @@ table {
 .disabled-button {
   cursor: not-allowed;
 }
+
+.toolbar-product {
+  position: relative;
+}
+
+.create-product-button {
+  position: absolute;
+  right: 14px;
+}
+
+.filter-input{
+  padding-left: 14px;
+  font-size: 12px;
+}

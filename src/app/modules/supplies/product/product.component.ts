@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
+import { Product } from 'src/app/shared/models/supplies/product.model';
 import { ProductService } from '../services/product.service';
 import { StockService } from '../services/stock.service';
 @Component({
@@ -25,7 +26,7 @@ export class ProductComponent implements OnInit, OnDestroy {
     'Stock',
     'actions',
   ];
-  dataSource: any[] = [];
+  dataSource: Product[] = [];
   dataSourceMatTable: any;
   stockToAdd = 0;
   stockToDelete = 0;
@@ -46,7 +47,7 @@ export class ProductComponent implements OnInit, OnDestroy {
       .getProducts()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((resp) => {
-        this.dataSource = resp.product.map((prod: any, index: number) => {
+        this.dataSource = resp.product.map((prod: Product, index: number) => {
           return {
             ...prod,
             Index: index + 1,
@@ -57,7 +58,19 @@ export class ProductComponent implements OnInit, OnDestroy {
 
         this.dataSourceMatTable = new MatTableDataSource(this.dataSource);
         this.dataSourceMatTable.sort = this.sort;
+        this.dataSourceMatTable.filterPredicate = (
+          data: Product,
+          filter: string
+        ) => data.Name?.trim().toLowerCase().indexOf(filter) != -1;
       });
+  }
+
+  applyFilter(event: any) {
+    let filter = event.target.value ?? '';
+    console.log({ filter });
+    filter = filter.trim();
+    filter = filter.toLowerCase();
+    this.dataSourceMatTable.filter = filter;
   }
 
   addStock(id: string): void {
@@ -74,7 +87,14 @@ export class ProductComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (product) => {
-          this.dataSource.find((ds) => ds._id === id).Stock = product.Stock;
+          const productFound = this.dataSource.find(
+            (ds: Product) => ds._id === id
+          );
+
+          if (productFound) {
+            productFound.Stock = product.Stock;
+          }
+
           this.stockToAdd = 0;
           this.savingStock = false;
         },
@@ -109,7 +129,14 @@ export class ProductComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (product) => {
-          this.dataSource.find((ds) => ds._id === id).Stock = product.Stock;
+          const productFound = this.dataSource.find(
+            (ds: Product) => ds._id === id
+          );
+
+          if (productFound) {
+            productFound.Stock = product.Stock;
+          }
+
           this.savingStock = false;
           this.stockToDelete = 0;
         },

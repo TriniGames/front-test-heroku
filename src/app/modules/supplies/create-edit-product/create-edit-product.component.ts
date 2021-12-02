@@ -45,13 +45,19 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
     this.getSupplies();
     this.getProductType();
     this.getProduct();
+    this.changeSupplyType();
+    this.showAllSupply();
+  }
 
+  changeSupplyType() {
     this.controls('Type')
       .valueChanges.pipe(takeUntil(this.unsubscribe$))
       .subscribe((type) => {
         this.changeSupplies(type);
       });
+  }
 
+  showAllSupply() {
     this.controls('ShowAllSupplies')
       .valueChanges.pipe(takeUntil(this.unsubscribe$))
       .subscribe((showAll) => {
@@ -151,10 +157,6 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
     return this.formGroup.get(controlName) as FormControl;
   }
 
-  formArrays(controlName: string): FormArray {
-    return this.formGroup.get(controlName) as FormArray;
-  }
-
   onSubmit(): void {
     if (this.formGroup.get('Id')?.value) {
       this.productService
@@ -180,18 +182,21 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   }
 
   addSupply(supply: any = null): void {
-    const supliesArray = this.formGroup.get('Supplies') as FormArray;
-    supliesArray.push(this.createNewSupply(supply));
+    this.getSuppliesFormArray.push(this.createNewSupply(supply));
   }
 
   deleteSuply(index: number): void {
-    const supliesArray = this.formGroup.get('Supplies') as FormArray;
-    supliesArray.removeAt(index);
+    this.getSuppliesFormArray.removeAt(index);
+  }
+
+  get getSuppliesFormArray(): FormArray {
+    return this.formGroup.get('Supplies') as FormArray;
   }
 
   createNewSupply(supply: any = null): FormGroup {
     return this.formBuilder.group({
       SingleSupply: [supply, Validators.required],
+      SupplyQuantities: this.formBuilder.array([]),
     });
   }
 

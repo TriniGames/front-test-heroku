@@ -1,6 +1,13 @@
-<mat-toolbar class="mat-elevation-z8">
+<mat-toolbar class="mat-elevation-z8 toolbar-product">
   <span class="fill-remaining-space">Producto</span>
-  <button mat-icon-button class="help-button" (click)="createProduct()">
+  <mat-form-field class="filter-input">
+    <input matInput (input)="applyFilter($event)" placeholder="Buscar Nombre" />
+  </mat-form-field>
+  <button
+    mat-raised-button
+    class="create-product-button"
+    (click)="createProduct()"
+  >
     <mat-icon> add </mat-icon>
     <span>Crear Producto</span>
   </button>
@@ -29,7 +36,7 @@
 
   <ng-container matColumnDef="TypeDescription">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo de Producto</th>
-    <td mat-cell *matCellDef="let element">{{ element.TypeDescription }} </td>
+    <td mat-cell *matCellDef="let element">{{ element.TypeDescription }}</td>
   </ng-container>
 
   <ng-container matColumnDef="Size">

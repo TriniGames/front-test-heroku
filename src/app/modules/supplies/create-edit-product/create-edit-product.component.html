@@ -78,7 +78,7 @@
       <div
         #supply
         formArrayName="Supplies"
-        *ngFor="let suply of formArrays('Supplies')['controls']; let i = index"
+        *ngFor="let suply of getSuppliesFormArray['controls']; let i = index"
         style="width: 100%"
       >
         <div [formGroupName]="i">

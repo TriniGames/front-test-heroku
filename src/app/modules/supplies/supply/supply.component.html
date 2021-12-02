@@ -1,6 +1,9 @@
-<mat-toolbar class="mat-elevation-z8">
+<mat-toolbar class="mat-elevation-z8 toolbar-supply">
   <span class="fill-remaining-space">Insumos</span>
-  <button mat-icon-button class="help-button" (click)="createSupply()">
+  <mat-form-field class="filter-input">
+    <input matInput (input)="applyFilter($event)" placeholder="Buscar Nombre" />
+  </mat-form-field>
+  <button mat-raised-button class="create-supply-button" (click)="createSupply()">
     <mat-icon> add </mat-icon>
     <span>Crear Insumos</span>
   </button>

@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
+import { Supply } from 'src/app/shared/models/supplies/supply.model';
 import { StockService } from '../services/stock.service';
 import { SupplyService } from '../services/supply.service';
 
@@ -30,8 +31,8 @@ export class SupplyComponent implements OnInit, OnDestroy {
     'Stock',
     'actions',
   ];
-  dataSourceMatTable = new MatTableDataSource();
-  dataSource: any[] = [];
+  dataSourceMatTable: any;
+  dataSource: Supply[] = [];
   stockToAdd = 0;
   stockToDelete = 0;
   disableAddButton = true;
@@ -51,7 +52,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
       .getSupplies()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((resp) => {
-        const dataSource = resp.supply.map((sup: any, index: number) => {
+        this.dataSource = resp.supply.map((sup: Supply, index: number) => {
           return {
             ...sup,
             Index: index + 1,
@@ -59,9 +60,21 @@ export class SupplyComponent implements OnInit, OnDestroy {
           };
         });
 
-        this.dataSourceMatTable = new MatTableDataSource(dataSource);
+        this.dataSourceMatTable = new MatTableDataSource(this.dataSource);
         this.dataSourceMatTable.sort = this.sort;
+        this.dataSourceMatTable.filterPredicate = (
+          data: Supply,
+          filter: string
+        ) => data.Name?.trim().toLowerCase().indexOf(filter) != -1;
       });
+  }
+
+  applyFilter(event: any) {
+    let filter = event.target.value ?? '';
+    console.log({ filter });
+    filter = filter.trim();
+    filter = filter.toLowerCase();
+    this.dataSourceMatTable.filter = filter;
   }
 
   announceSortChange(sortState: Sort) {
@@ -112,7 +125,12 @@ export class SupplyComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (supply) => {
-          this.dataSource.find((ds) => ds._id === id).Stock = supply.Stock;
+          const supplyFound = this.dataSource.find((ds) => ds._id === id);
+
+          if (supplyFound) {
+            supplyFound.Stock = supply.Stock;
+          }
+
           this.savingStock = false;
           this.stockToDelete = 0;
         },

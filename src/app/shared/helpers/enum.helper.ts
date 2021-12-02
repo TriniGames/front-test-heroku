@@ -1,5 +1,5 @@
 export default class EnumHelper {
-  static typeName(type: string): string {
+  static typeName(type: string | null): string {
     switch (type) {
       case '1':
         return 'Damajuana';
