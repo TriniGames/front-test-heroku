@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import { State, Selector, Action } from '@ngxs/store';
 import { StateContext } from '@ngxs/store';
 import { tap } from 'rxjs/operators';
-import { LoginInfo } from 'src/app/shared/models/authenticate/login-info.model';
 import { UserInformation } from 'src/app/shared/models/authenticate/user-information.model';
 import { AuthenticateService } from '../services/authenticate.service';
-import { GetLogin, SetUserInformation } from './authenticate.actions';
+import { GetLogin, SetUserInformation, Signout } from './authenticate.actions';
 
 export interface Authentication {
   userInformation: UserInformation | null;
@@ -48,6 +47,15 @@ export class AuthenticateState {
         context.patchState({
           userInformation: loginInfo,
         });
+      })
+    );
+  }
+
+  @Action(Signout)
+  signout(context: StateContext<Authentication>) {
+    return this.authenticateService.signout().pipe(
+      tap((_) => {
+        context.setState({ userInformation: null });
       })
     );
   }

@@ -6,16 +6,34 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngxs/store';
-import { Observable, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { Observable, Subscription, throwError } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
+import { AuthenticateService } from 'src/app/modules/authenticate/services/authenticate.service';
+import { Signout } from 'src/app/modules/authenticate/store/authenticate.actions';
 import { AuthenticateState } from 'src/app/modules/authenticate/store/authenticate.state';
 import { LoaderService } from '../services/loader-services';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private requests: HttpRequest<any>[] = [];
+  private subscriptions: Subscription[] = [];
+  constructor(
+    private readonly loaderService: LoaderService,
+    private readonly store: Store,
+    private readonly router: Router
+  ) {}
 
-  constructor(private loaderService: LoaderService, private store: Store) {}
+  removeRequest(req: HttpRequest<any>) {
+    const i = this.requests.indexOf(req);
+
+    if (i >= 0) {
+      this.requests.splice(i, 1);
+      // this.subscriptions[i].unsubscribe();
+      // this.subscriptions.splice(i, 1);
+    }
+  }
 
   intercept(
     req: HttpRequest<any>,
@@ -23,23 +41,28 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     const token = this.store.selectSnapshot(AuthenticateState.token);
 
-    // const spinnerSubscription: Subscription =
-    //   this.loaderService.spinner$.subscribe();
+    // this.subscriptions.push(this.loaderService.spinner$.subscribe());
 
-    if (req.url.includes('user/login')) {
-      return next.handle(req).pipe(
-        finalize(() => {
-          // spinnerSubscription.unsubscribe();
-        })
-      );
-    } else {
-      const loginReq = req.clone({
+    if (!req.url.includes('user/login')) {
+      req = req.clone({
         headers: new HttpHeaders()
           .set('Content-Type', 'application/json')
           .set('authorization', token),
       });
-
-      return next.handle(loginReq).pipe(finalize(() => {}));
     }
+
+    this.requests.push(req);
+
+    return next.handle(req).pipe(
+      finalize(() => {
+        this.removeRequest(req);
+      }),
+      catchError((error) => {
+        this.store.dispatch(new Signout()).subscribe((success) => {
+          this.router.navigate(['/auth']);
+        });
+        return throwError(() => error);
+      })
+    );
   }
 }

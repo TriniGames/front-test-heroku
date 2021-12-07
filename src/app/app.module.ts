@@ -21,6 +21,7 @@ import { MainLayoutModule } from './modules/layouts/main-layout/main-layout.modu
 import { ConfirmationDialogModule } from './shared/components/confirmation-dialog/confirmation-dialog.module';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { SupplyState } from './modules/supplies/store/supply.state';
 @NgModule({
   declarations: [AppComponent, OnlydigitsDirective],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -38,7 +39,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatGridListModule,
     MatButtonModule,
     MatCardModule,
-    NgxsModule.forRoot([AuthenticateState], {
+    NgxsModule.forRoot([AuthenticateState, SupplyState], {
       developmentMode: !environment.production,
     }),
     NgxsStoragePluginModule.forRoot(),

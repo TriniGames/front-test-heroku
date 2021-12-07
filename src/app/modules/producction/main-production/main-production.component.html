@@ -23,6 +23,14 @@
         <mat-checkbox (change)="checkSuppliesToProduce($event, node)"
           >{{ node.name }} ({{ node.stock }})</mat-checkbox
         >
+        <button
+          mat-icon-button
+          class="help-button"
+          matTooltip="{{ node.stockDetail }}"
+          matTooltipPosition="below"
+        >
+          <mat-icon> info </mat-icon>
+        </button>
         <mat-form-field
           appearance="fill"
           style="font-size: 12px; margin-left: 14px"

@@ -71,7 +71,6 @@ export class SupplyComponent implements OnInit, OnDestroy {
 
   applyFilter(event: any) {
     let filter = event.target.value ?? '';
-    console.log({ filter });
     filter = filter.trim();
     filter = filter.toLowerCase();
     this.dataSourceMatTable.filter = filter;

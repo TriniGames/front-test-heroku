@@ -8,17 +8,37 @@
     <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
   </button>
   <span class="main-tittle">Viña Alta</span>
+
+  <button
+    class="notifications"
+    mat-icon-button
+    [matBadge]="qtyOfWarnings"
+    matBadgeColor="accent"
+    [matMenuTriggerFor]="menu"
+  >
+    <mat-icon> notifications </mat-icon>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item *ngFor="let warningSupply of warningSupplies">
+      <b>{{ warningSupply.Name }}: </b>
+      <span style="color: red">Stock: {{ warningSupply.Stock }}</span> / Minimo:
+      {{ warningSupply.MinimumStock }}
+    </button>
+  </mat-menu>
 </mat-toolbar>
 
 <mat-sidenav-container>
   <mat-sidenav #sidenav="matSidenav" class="mat-elevation-z8">
     <img
       class="avatar mat-elevation-z8"
-      src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2070&q=80"
+      ngxGravatar
+      [email]="'example@mail.com'"
     />
 
-    <h4 class="name">Mayra Bargas</h4>
-    <p class="designation">Administrativa</p>
+    <h4 class="name">
+      {{ userInformation.FirstName }} {{ userInformation.LastName }}
+    </h4>
+    <p class="designation">{{ userInformation.Role }}</p>
 
     <mat-divider></mat-divider>
 
@@ -50,21 +70,28 @@
       <mat-icon>person</mat-icon>
       <span>Profile</span>
     </button>
-    <button mat-button class="menu-button">
-      <mat-icon>info</mat-icon>
-      <span>About</span>
-    </button>
 
     <mat-divider></mat-divider>
 
-    <button mat-button class="menu-button">
-      <mat-icon>help</mat-icon>
-      <span>Help</span>
+    <button mat-button class="menu-button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
     </button>
   </mat-sidenav>
   <mat-sidenav-content>
-    <div class="content" [ngClass]="sidenav.opened ? 'ml-250' : 'ml-32'">
-      <router-outlet style="width: 100%"> </router-outlet>
-    </div>
+    <ng-container vstyle="width: 100%" *ngIf="showMainContent; else outlet">
+      <div class="wrapper">
+        <div class="inner-wrapper">
+          <div class="logo">
+            <img src="../../../../assets/img/logo.png" alt="" />
+            <h2>Bienvenido</h2>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #outlet>
+      <div class="content" [ngClass]="sidenav.opened ? 'ml-250' : 'ml-32'">
+        <router-outlet style="width: 100%"> </router-outlet></div
+    ></ng-template>
   </mat-sidenav-content>
 </mat-sidenav-container>

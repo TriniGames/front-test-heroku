@@ -21,7 +21,8 @@ import { NgxsModule } from '@ngxs/store';
 import { SupplyState } from './store/supply.state';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
 @NgModule({
   declarations: [
     ProductComponent,
@@ -48,6 +49,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MatSortModule,
     NgxsModule.forFeature([SupplyState]),
     MatProgressSpinnerModule,
+    MatSnackBarModule,
   ],
 })
 export class SuppliesModule {}

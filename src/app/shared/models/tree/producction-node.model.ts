@@ -7,4 +7,5 @@ export interface ProductionNode {
   index?: number;
   stock?: number;
   quantityToProduce?: number;
+  stockDetail?: string;
 }

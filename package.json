@@ -27,6 +27,7 @@
         "@ngxs/storage-plugin": "^3.7.2",
         "@ngxs/store": "^3.7.2",
         "express": "^4.17.1",
+        "ngx-gravatar": "^11.0.0",
         "path": "^0.12.7",
         "rxjs": "~7.4.0",
         "tslib": "^2.3.0",

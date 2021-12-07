@@ -11,14 +11,20 @@
     [ngClass]="helpClicked ? 'w70' : 'w100'"
   >
     <form [formGroup]="formGroup" class="form">
-      <mat-form-field class="form-element pr-14" style="width: 78%">
+      <mat-form-field
+        class="form-element pr-14"
+        style="width: 58%; box-sizing: border-box"
+      >
         <input matInput placeholder="Nombre" formControlName="Name" />
         <mat-error *ngIf="!controls('Name').valid && controls('Name').touched">
           {{ error }}
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field class="form-element" style="width: 20%">
+      <mat-form-field
+        class="form-element pr-14"
+        style="width: 20%; box-sizing: border-box"
+      >
         <mat-select placeholder="Tipo" formControlName="Type">
           <mat-option
             *ngFor="let productType of productTypeOptions"
@@ -26,6 +32,22 @@
             >{{ productType.Name }}</mat-option
           >
         </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="form-element" style="width: 20%">
+        <input
+          matInput
+          placeholder="Stock Minimo"
+          formControlName="MinimumStock"
+          type="number"
+        />
+        <mat-error
+          *ngIf="
+            !controls('MinimumStock').valid && controls('MinimumStock').touched
+          "
+        >
+          {{ error }}
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field class="form-element" style="width: 100%">
@@ -44,9 +66,7 @@
         </mat-error>
       </mat-form-field>
 
-      <div
-        class="form-element button-wrap"
-      >
+      <div class="form-element button-wrap">
         <button
           mat-raised-button
           type="button"
@@ -69,7 +89,7 @@
         <button
           mat-raised-button
           type="button"
-          class="button accessory-button"
+          class="button accessory-button clean-form"
           (click)="clearForm()"
         >
           Limpiar Formulario

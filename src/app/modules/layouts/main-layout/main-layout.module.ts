@@ -10,13 +10,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
+import { GravatarModule } from 'ngx-gravatar';
 
 @NgModule({
   declarations: [
     MainLayoutComponent,
     SidebarComponent,
     SidebarMenuComponent,
-    HeaderComponent
+    HeaderComponent,
   ],
   imports: [
     CommonModule,
@@ -25,8 +28,11 @@ import { MatDividerModule } from '@angular/material/divider';
     MatSidenavModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    GravatarModule,
+    MatMenuModule,
+    MatBadgeModule,
   ],
-  exports: [MainLayoutComponent]
+  exports: [MainLayoutComponent],
 })
-export class MainLayoutModule { }
+export class MainLayoutModule {}

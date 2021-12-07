@@ -57,7 +57,6 @@ export class CreateEditSupplyComponent implements OnInit {
             this.supplySelected$
               .pipe(takeUntil(this.unsubscribe$))
               .subscribe((supplySelected) => {
-                console.log(supplySelected);
                 if (supplySelected) {
                   this.formGroup.patchValue({
                     ...supplySelected,
@@ -80,8 +79,9 @@ export class CreateEditSupplyComponent implements OnInit {
     this.formGroup = this._formBuilder.group({
       Id: [null],
       Name: [null, [Validators.required]],
-      Description: [null, Validators.required],
+      Description: [null],
       Type: [null, [Validators.required]],
+      MinimumStock: [null, [Validators.required]],
     });
   }
 

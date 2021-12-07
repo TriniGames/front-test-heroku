@@ -14,6 +14,7 @@ import {
 export interface Supply {
   supplies: any[];
   supplySelected: any;
+  warningSupplies: any;
   productSelected: any;
 }
 
@@ -21,6 +22,7 @@ export interface Supply {
   name: 'supply',
   defaults: {
     supplies: [],
+    warningSupplies: [],
     supplySelected: null,
     productSelected: null,
   },
@@ -47,14 +49,20 @@ export class SupplyState {
     return state.productSelected;
   }
 
+  @Selector()
+  static selectWarningSupplies(state: Supply) {
+    return state.warningSupplies;
+  }
+
   @Action(GetSupplies)
   getSupplies(context: StateContext<Supply>, action: GetSupplies) {
     return this.supplyService.getSupplies().pipe(
       tap((resp) => {
-        context.patchState({
+        const supplies = context.patchState({
           supplies: resp.supply.map((s: any) => {
             return { ...s, TypeDescription: this.typeName(s.Type) };
           }),
+          warningSupplies: resp.supply.filter((s: any) => s.Stock <= s.MinimumStock),
         });
 
         context.dispatch(new GetPartialProducts());
@@ -80,6 +88,7 @@ export class SupplyState {
             Name: pp.Name,
             IsPartial: true,
             TypeDescription: this.typeName(pp.Type),
+            Type: pp.Type,
           };
         });
 

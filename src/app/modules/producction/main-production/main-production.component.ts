@@ -166,32 +166,51 @@ export class MainProductionComponent implements OnInit, OnDestroy {
                 resp.product.forEach((product: any, index: number) => {
                   const suppliesParsed = JSON.parse(product.Supplies);
 
-                  const childrens = suppliesParsed.map((supply: any) => {
-                    return {
-                      name: supply.SingleSupply.map((ss: string) => {
+                  const stockAvailables =
+                    this.getStockAvailable(suppliesParsed);
+
+                  const minStock = stockAvailables.reduce(function (
+                    prev,
+                    curr
+                  ) {
+                    return prev.Stock < curr.Stock ? prev : curr;
+                  }).Stock;
+
+                  const children = {
+                    name: suppliesParsed
+                      .map((sp: any) => {
                         return this.getSupplyName(
-                          ss,
+                          sp._id,
                           partialProducts.product,
                           supplies.supply
                         );
-                      }).join(' - '),
-                      ids: supply.SingleSupply,
-                      idProduct: product._id,
-                      index,
-                      stock: this.getStockAvailable(supply.SingleSupply),
-                    };
-                  });
+                      })
+                      .join(' - '),
+                    ids: suppliesParsed
+                      .map((sp: any) => {
+                        return sp._id;
+                      })
+                      .join(' - '),
+                    idProduct: product._id,
+                    index,
+                    stock: minStock,
+                    stockDetail: stockAvailables
+                      .map((sa) => {
+                        return `${sa.Name} - ${sa.Stock}`;
+                      })
+                      .join(' / '),
+                  };
 
                   //Damajuana
                   if (product.Type == 1) {
                     this.treeProductionDamajuanaData.push({
                       name: product.Name,
-                      children: childrens,
+                      children: [children],
                     });
                   } else {
                     this.treeProductionBottleData.push({
                       name: product.Name,
-                      children: childrens,
+                      children: [children],
                     });
                   }
                 });
@@ -205,28 +224,30 @@ export class MainProductionComponent implements OnInit, OnDestroy {
       });
   }
 
-  getStockAvailable(ids: string[]): number {
-    const stocks: number[] = [];
+  getStockAvailable(ids: any[]): any[] {
+    const stocks: any[] = [];
 
-    ids.forEach((supplyId) => {
-      const supply: any = this.supplies.find((s: any) => s._id === supplyId);
+    ids.forEach((supplyDetails) => {
+      const supply: any = this.supplies.find(
+        (s: any) => s._id === supplyDetails._id
+      );
 
       if (supply) {
-        stocks.push(supply.Stock);
+        stocks.push(supply);
       } else {
         const partialProduct: any = this.partialProducts.find(
-          (s: any) => s._id === supplyId
+          (s: any) => s._id === supplyDetails._id
         );
 
-        stocks.push(partialProduct.Stock);
+        stocks.push(partialProduct);
       }
     });
 
-    if (stocks && stocks.length) {
-      return Math.min(...stocks);
-    }
+    // if (stocks && stocks.length) {
+    //   return Math.min(...stocks);
+    // }
 
-    return 0;
+    return stocks;
   }
 
   hasChild = (_: number, node: ProductionNode) =>

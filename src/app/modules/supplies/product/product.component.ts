@@ -67,7 +67,6 @@ export class ProductComponent implements OnInit, OnDestroy {
 
   applyFilter(event: any) {
     let filter = event.target.value ?? '';
-    console.log({ filter });
     filter = filter.trim();
     filter = filter.toLowerCase();
     this.dataSourceMatTable.filter = filter;
@@ -106,7 +105,6 @@ export class ProductComponent implements OnInit, OnDestroy {
   }
 
   announceSortChange(sortState: Sort) {
-    console.log(this.dataSourceMatTable);
     if (sortState.direction) {
       this.liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
     } else {

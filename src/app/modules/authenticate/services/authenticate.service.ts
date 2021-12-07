@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { LoginInfo } from 'src/app/shared/models/authenticate/login-info.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
 import { UserInformation } from 'src/app/shared/models/authenticate/user-information.model';
@@ -26,5 +26,9 @@ export class AuthenticateService {
 
   isTokenExpired(token: string): boolean {
     return this.jwtHelperService.isTokenExpired(token);
+  }
+
+  signout(): Observable<null> {
+    return of(null);
   }
 }
