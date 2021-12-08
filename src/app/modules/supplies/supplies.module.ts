@@ -22,6 +22,7 @@ import { SupplyState } from './store/supply.state';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     NgxsModule.forFeature([SupplyState]),
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatExpansionModule,
   ],
 })
 export class SuppliesModule {}

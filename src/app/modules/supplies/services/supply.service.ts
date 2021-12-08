@@ -20,9 +20,15 @@ export class SupplyService {
     return this.http.get<any>(this.supplyUrl).pipe(map((response) => response));
   }
 
+  getSuppliesAndPartialProducts(): Observable<any> {
+    return this.http
+      .get<any>(`${this.supplyUrl}/withPartial`)
+      .pipe(map((response) => response));
+  }
+
   getSupply(id: string): Observable<any> {
     return this.http
-      .get<any>(`${this.supplyUrl}/${id}`)
+      .get<any>(`${this.supplyUrl}/byId/${id}`)
       .pipe(map((response) => response));
   }
 

@@ -19,11 +19,19 @@
     <mat-icon> notifications </mat-icon>
   </button>
   <mat-menu #menu="matMenu">
-    <button mat-menu-item *ngFor="let warningSupply of warningSupplies">
-      <b>{{ warningSupply.Name }}: </b>
-      <span style="color: red">Stock: {{ warningSupply.Stock }}</span> / Minimo:
-      {{ warningSupply.MinimumStock }}
-    </button>
+    <ng-container *ngIf="warningSupplies.length; else keepgoingthisway">
+      <button mat-menu-item *ngFor="let warningSupply of warningSupplies">
+        <b>{{ warningSupply.Name }}: </b>
+        <span style="color: red">Stock: {{ warningSupply.Stock }}</span> /
+        Minimo:
+        {{ warningSupply.MinimumStock }}
+      </button>
+    </ng-container>
+    <ng-template #keepgoingthisway>
+      <button mat-menu-item>
+        <span>Estamos bien</span>
+      </button>
+    </ng-template>
   </mat-menu>
 </mat-toolbar>
 

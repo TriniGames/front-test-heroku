@@ -127,6 +127,16 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
                     }
                   });
 
+                  const partialProduct =
+                    this.getSuppliesCheckFormArray.controls.findIndex(
+                      (control) =>
+                        control.get('IdSupply')?.value === params['id']
+                    );
+
+                  if (partialProduct >= 0) {
+                    this.getSuppliesCheckFormArray.removeAt(partialProduct);
+                  }
+
                   // this.getSuppliesCheckFormArray.controls.find()
                 });
             },
@@ -149,7 +159,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   getSupplies(): void {
     this.store.dispatch(new GetSupplies());
 
-    this.supplies$.pipe(takeUntil(this.unsubscribe$)).subscribe((supplies) => {
+    this.supplies$.pipe(take(1)).subscribe((supplies) => {
       if (!supplies) {
         return;
       }
@@ -182,6 +192,8 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
       });
 
       this.supliesOptionsFiltered = [...this.supliesOptions];
+
+      console.count();
     });
   }
 
@@ -289,7 +301,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
 
   createNewSupplyCheck(supply: any = null): FormGroup {
     return this.formBuilder.group({
-      IdSupply: [supply._id ?? '', Validators.required],
+      IdSupply: [supply._id ?? ''],
       IsPartial: [supply.IsPartial ?? false],
       Checked: [false],
       Name: [{ value: supply.Name ?? '', disabled: true }],

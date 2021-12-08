@@ -56,16 +56,16 @@ export class SupplyState {
 
   @Action(GetSupplies)
   getSupplies(context: StateContext<Supply>, action: GetSupplies) {
-    return this.supplyService.getSupplies().pipe(
+    return this.supplyService.getSuppliesAndPartialProducts().pipe(
       tap((resp) => {
-        const supplies = context.patchState({
+        context.patchState({
           supplies: resp.supply.map((s: any) => {
             return { ...s, TypeDescription: this.typeName(s.Type) };
           }),
-          warningSupplies: resp.supply.filter((s: any) => s.Stock <= s.MinimumStock),
+          warningSupplies: resp.supply.filter(
+            (s: any) => s.Stock <= s.MinimumStock
+          ),
         });
-
-        context.dispatch(new GetPartialProducts());
       })
     );
   }

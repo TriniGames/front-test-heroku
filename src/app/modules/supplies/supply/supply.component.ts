@@ -9,12 +9,14 @@ import {
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { Store } from '@ngxs/store';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
 import { Supply } from 'src/app/shared/models/supplies/supply.model';
 import { StockService } from '../services/stock.service';
 import { SupplyService } from '../services/supply.service';
+import { GetSupplies } from '../store/supply.actions';
 
 @Component({
   selector: 'app-supply',
@@ -44,7 +46,8 @@ export class SupplyComponent implements OnInit, OnDestroy {
     private readonly liveAnnouncer: LiveAnnouncer,
     private readonly router: Router,
     private readonly supplyService: SupplyService,
-    private readonly stockService: StockService
+    private readonly stockService: StockService,
+    private readonly store: Store
   ) {}
 
   ngOnInit(): void {
@@ -101,6 +104,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
           this.dataSource.find((ds) => ds._id === id)!.Stock = supply.Stock;
           this.stockToAdd = 0;
           this.savingStock = false;
+          this.store.dispatch(new GetSupplies());
         },
         (err) => {
           this.savingStock = false;
@@ -132,6 +136,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
 
           this.savingStock = false;
           this.stockToDelete = 0;
+          this.store.dispatch(new GetSupplies());
         },
         (err) => {
           this.savingStock = false;
