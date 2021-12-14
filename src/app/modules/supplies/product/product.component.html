@@ -68,7 +68,11 @@
           <mat-icon> edit </mat-icon>
         </button>
 
-        <button mat-icon-button (click)="deleteSupply(element._id)">
+        <button
+          *ngIf="specialPermission"
+          mat-icon-button
+          (click)="deleteSupply(element._id)"
+        >
           <mat-icon> delete </mat-icon>
         </button>
 

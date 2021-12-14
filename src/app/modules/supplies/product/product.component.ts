@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material/sort';
+import { Observable, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 
+import { AuthenticateState } from '../../authenticate/store/authenticate.state';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
@@ -10,8 +12,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Product } from 'src/app/shared/models/supplies/product.model';
 import { ProductService } from '../services/product.service';
 import { Router } from '@angular/router';
+import { Select } from '@ngxs/store';
 import { StockService } from '../services/stock.service';
-import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-product',
@@ -19,7 +21,9 @@ import { Subject } from 'rxjs';
   styleUrls: ['./product.component.scss'],
 })
 export class ProductComponent implements OnInit, OnDestroy {
-  unsubscribe$ = new Subject();
+  private unsubscribe$ = new Subject();
+  @Select(AuthenticateState.selectUserInformation)
+  userInformation$: Observable<any>;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
   displayedColumns: string[] = [
     'Index',
@@ -38,6 +42,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   savingStock = false;
   addStockInputToShow: number = -1;
   removeStockInputToShow: number = -1;
+  specialPermission = false;
 
   constructor(
     private readonly dialog: MatDialog,
@@ -68,6 +73,12 @@ export class ProductComponent implements OnInit, OnDestroy {
           filter: string
         ) => data.Name?.trim().toLowerCase().indexOf(filter) != -1;
       });
+
+    this.userInformation$.subscribe((ui) => {
+      if (ui.Role && ui.Role == 'Admin') {
+        this.specialPermission = true;
+      }
+    });
   }
 
   applyFilter(event: any) {
