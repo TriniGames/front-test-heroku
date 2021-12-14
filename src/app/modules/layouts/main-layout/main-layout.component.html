@@ -1,21 +1,12 @@
 <mat-toolbar class="mat-elevation-z8">
-  <button
-    mat-icon-button
-    *ngIf="sidenav.mode === 'over'"
-    (click)="sidenav.toggle()"
-  >
+  <button mat-icon-button *ngIf="sidenav.mode === 'over'" (click)="sidenav.toggle()">
     <mat-icon *ngIf="!sidenav.opened"> menu </mat-icon>
     <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
   </button>
-  <span class="main-tittle">Viña Alta</span>
+  <span class="main-tittle"><a href="main">Viña Alta</a> </span>
 
-  <button
-    class="notifications"
-    mat-icon-button
-    [matBadge]="qtyOfWarnings"
-    matBadgeColor="accent"
-    [matMenuTriggerFor]="menu"
-  >
+  <button class="notifications" mat-icon-button [matBadge]="qtyOfWarnings" matBadgeColor="accent"
+    [matMenuTriggerFor]="menu">
     <mat-icon> notifications </mat-icon>
   </button>
   <mat-menu #menu="matMenu">
@@ -37,11 +28,7 @@
 
 <mat-sidenav-container>
   <mat-sidenav #sidenav="matSidenav" class="mat-elevation-z8">
-    <img
-      class="avatar mat-elevation-z8"
-      ngxGravatar
-      [email]="'example@mail.com'"
-    />
+    <img class="avatar mat-elevation-z8" ngxGravatar [email]="'example@mail.com'" />
 
     <h4 class="name">
       {{ userInformation.FirstName }} {{ userInformation.LastName }}
@@ -50,27 +37,15 @@
 
     <mat-divider></mat-divider>
 
-    <button
-      mat-button
-      class="menu-button"
-      onclick="location.href='main/supplies/supplies'"
-    >
+    <button mat-button class="menu-button" onclick="location.href='main/supplies/supplies'">
       <mat-icon>work_outline</mat-icon>
       <span><a href=""></a> Insumos</span>
     </button>
-    <button
-      mat-button
-      class="menu-button"
-      onclick="location.href='main/supplies/products'"
-    >
+    <button mat-button class="menu-button" onclick="location.href='main/supplies/products'">
       <mat-icon>work</mat-icon>
       <span><a href=""></a> Productos</span>
     </button>
-    <button
-      mat-button
-      class="menu-button"
-      onclick="location.href='main/production/prod'"
-    >
+    <button mat-button class="menu-button" onclick="location.href='main/production/prod'">
       <mat-icon>work</mat-icon>
       <span><a href=""></a> Producción</span>
     </button>
@@ -99,7 +74,8 @@
     </ng-container>
     <ng-template #outlet>
       <div class="content" [ngClass]="sidenav.opened ? 'ml-250' : 'ml-32'">
-        <router-outlet style="width: 100%"> </router-outlet></div
-    ></ng-template>
+        <router-outlet style="width: 100%"> </router-outlet>
+      </div>
+    </ng-template>
   </mat-sidenav-content>
 </mat-sidenav-container>

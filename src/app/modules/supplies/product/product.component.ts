@@ -1,14 +1,18 @@
-import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
+
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
 import { Product } from 'src/app/shared/models/supplies/product.model';
 import { ProductService } from '../services/product.service';
+import { Router } from '@angular/router';
 import { StockService } from '../services/stock.service';
+import { Subject } from 'rxjs';
+
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
@@ -36,6 +40,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   removeStockInputToShow: number = -1;
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly liveAnnouncer: LiveAnnouncer,
     private readonly productService: ProductService,
     private readonly router: Router,
@@ -151,6 +156,26 @@ export class ProductComponent implements OnInit, OnDestroy {
 
   deleteProduct(event: any): void {
     console.log({ event });
+  }
+
+  deleteSupply(id: string) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '600px',
+      data: { confirmMessage: 'Eliminar', cancelMessage: 'No, por ahora no' },
+    });
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      if (confirm) {
+        this.productService
+          .deleteProduct(id)
+          .pipe(take(1))
+          .subscribe(() => {
+            const index = this.dataSourceMatTable.data.indexOf(id);
+            this.dataSourceMatTable.data.splice(index, 1);
+            this.dataSourceMatTable._updateChangeSubscription();
+          });
+      }
+    });
   }
 
   editProduct(event: any): void {

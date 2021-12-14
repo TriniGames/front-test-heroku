@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
+import { Component, OnInit } from '@angular/core';
 import { Observable, Subject, take } from 'rxjs';
-import { Signout } from '../../authenticate/store/authenticate.actions';
+import { Select, Store } from '@ngxs/store';
+
 import { AuthenticateState } from '../../authenticate/store/authenticate.state';
 import { GetSupplies } from '../../supplies/store/supply.actions';
+import { Signout } from '../../authenticate/store/authenticate.actions';
 import { SupplyState } from '../../supplies/store/supply.state';
 
 @Component({
@@ -46,7 +47,6 @@ export class MainLayoutComponent implements OnInit {
 
   getWarningSupplies(): void {
     this.warningSupplies$.pipe(take(1)).subscribe((ws) => {
-      console.log({ ws });
       this.warningSupplies = ws;
       this.qtyOfWarnings = this.warningSupplies.length;
     });

@@ -1,4 +1,3 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -8,15 +7,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { GetProduct, GetSupplies } from '../store/supply.actions';
 import { Observable, Subject } from 'rxjs';
+import { Select, Store } from '@ngxs/store';
 import { take, takeUntil } from 'rxjs/operators';
+
 import { LookupService } from 'src/app/shared/services/lookup/lookup.service';
-import { ProductService } from '../services/product.service';
-import { GetProduct, GetSupplies, GetSupply } from '../store/supply.actions';
-import { SupplyState } from '../store/supply.state';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ProductService } from '../services/product.service';
 import { ProductSupplyType } from 'src/app/shared/enum/lookup.enum';
+import { SupplyState } from '../store/supply.state';
 
 @Component({
   selector: 'app-create-edit',
@@ -30,18 +31,19 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   suppliesForm!: FormGroup;
   error = 'Invalido';
   buttonText = 'Guardar';
-  supliesOptions: any[] = [];
+  suppliesOptions: any[] = [];
   suppliesChecked: Array<any> = [];
-  supliesOptionsFiltered: any[] = [];
+  suppliesOptionsFiltered: any[] = [];
   productTypeOptions: any[] = [];
   unitOptions: any[] = [];
   helpClicked = false;
-  SupliesForm!: FormArray;
+  SuppliesForm!: FormArray;
   unsubscribe$ = new Subject();
   typeSelected = '0';
   bottleSupply = 0;
-  damajuanaSupply = 0;
-  showErroSupply = false;
+  demijohnSupply = 0;
+  showErrorSupply = false;
+  existingOptions = false;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -95,55 +97,110 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((params) => {
         if (params && params['id']) {
-          this.store.dispatch(new GetProduct(params['id'])).subscribe(
-            () => {
-              this.productSelected$
-                .pipe(take(1))
-                .subscribe((productSelected) => {
-                  if (productSelected) {
-                    this.formGroup.patchValue({
-                      ...productSelected,
-                      Id: productSelected._id,
-                    });
+          this.store
+            .dispatch(new GetProduct(params['id']))
+            .pipe(take(1))
+            .subscribe(
+              () => {
+                this.productSelected$
+                  .pipe(take(1))
+                  .subscribe((productSelected) => {
+                    if (productSelected) {
+                      this.formGroup.patchValue({
+                        ...productSelected,
+                        Id: productSelected._id,
+                      });
 
-                    this.buttonText = 'Actualizar';
-                  }
-
-                  productSelected.Supplies.forEach((supplyInProduct: any) => {
-                    const supplyControl =
-                      this.getSuppliesCheckFormArray.controls.find(
-                        (control) =>
-                          control.get('IdSupply')?.value === supplyInProduct._id
-                      );
-
-                    if (supplyControl) {
-                      const checked = supplyControl.get('Checked');
-                      const qty = supplyControl.get('Quantity');
-                      checked?.setValue(true);
-                      qty?.setValue(supplyInProduct.Quantity);
-                      qty?.enable();
-                      qty?.setValidators([Validators.required]);
-                      qty?.updateValueAndValidity();
+                      this.buttonText = 'Actualizar';
                     }
-                  });
 
-                  const partialProduct =
-                    this.getSuppliesCheckFormArray.controls.findIndex(
-                      (control) =>
-                        control.get('IdSupply')?.value === params['id']
+                    productSelected.Supplies.forEach(
+                      (supplyInProduct: any, index: number) => {
+                        if (index === 0) {
+                          supplyInProduct.forEach((sip: any) => {
+                            const suppliesOptions = (
+                              this.formGroup.controls[
+                                'SuppliesCheckArray'
+                              ] as FormArray
+                            )
+                              .at(index)
+                              .get('SuppliesOptions') as FormArray;
+
+                            const supplyControl = suppliesOptions.controls.find(
+                              (sc) => {
+                                return sc.get('IdSupply')?.value == sip._id;
+                              }
+                            );
+
+                            const partialProduct =
+                              suppliesOptions.controls.findIndex(
+                                (control) =>
+                                  control.get('IdSupply')?.value ===
+                                  params['id']
+                              );
+
+                            if (partialProduct >= 0) {
+                              suppliesOptions.removeAt(partialProduct);
+                            }
+
+                            if (supplyControl) {
+                              const checked = supplyControl.get('Checked');
+                              const qty = supplyControl.get('Quantity');
+                              checked?.setValue(true);
+                              qty?.setValue(sip.Quantity);
+                              qty?.enable();
+                              qty?.setValidators([Validators.required]);
+                              qty?.updateValueAndValidity();
+                            }
+                          });
+                        } else {
+                          this.addNewSupplyCheck();
+
+                          supplyInProduct.forEach((sip: any) => {
+                            const suppliesOptions = (
+                              this.formGroup.controls[
+                                'SuppliesCheckArray'
+                              ] as FormArray
+                            )
+                              .at(index)
+                              .get('SuppliesOptions') as FormArray;
+
+                            const supplyControl = suppliesOptions.controls.find(
+                              (sc) => {
+                                return sc.get('IdSupply')?.value == sip._id;
+                              }
+                            );
+
+                            const partialProduct =
+                              suppliesOptions.controls.findIndex(
+                                (control) =>
+                                  control.get('IdSupply')?.value ===
+                                  params['id']
+                              );
+
+                            if (partialProduct >= 0) {
+                              suppliesOptions.removeAt(partialProduct);
+                            }
+
+                            if (supplyControl) {
+                              const checked = supplyControl.get('Checked');
+                              const qty = supplyControl.get('Quantity');
+                              checked?.setValue(true);
+                              qty?.setValue(sip.Quantity);
+                              qty?.enable();
+                              qty?.setValidators([Validators.required]);
+                              qty?.updateValueAndValidity();
+                            }
+                          });
+                        }
+                      }
                     );
-
-                  if (partialProduct >= 0) {
-                    this.getSuppliesCheckFormArray.removeAt(partialProduct);
-                  }
-
-                  // this.getSuppliesCheckFormArray.controls.find()
-                });
-            },
-            (err) => {
-              this.router.navigate(['main', 'supplies', 'createEditProduct']);
-            }
-          );
+                  });
+              },
+              (err) => {
+                this.router.navigate(['main', 'supplies', 'createEditProduct']);
+              }
+            );
         }
       });
   }
@@ -164,7 +221,7 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.supliesOptions = supplies.map((supply) => {
+      this.suppliesOptions = supplies.map((supply) => {
         return {
           ...supply,
           Name: supply.IsPartial ? `${supply.Name} - Parcial` : supply.Name,
@@ -175,25 +232,16 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
         (s) => s.Type === ProductSupplyType.Botella
       ).length;
 
-      this.damajuanaSupply = supplies.filter(
+      this.demijohnSupply = supplies.filter(
         (s) => s.Type === ProductSupplyType.Damajuana
       ).length;
 
-      this.supliesOptions.forEach((supplyOption) => {
-        const exists = this.getSuppliesCheckFormArray.controls.some(
-          (control) => control.get('IdSupply')?.value === supplyOption._id
-        );
+      this.suppliesOptionsFiltered = [...this.suppliesOptions];
 
-        if (!exists) {
-          this.getSuppliesCheckFormArray.push(
-            this.createNewSupplyCheck(supplyOption)
-          );
-        }
-      });
-
-      this.supliesOptionsFiltered = [...this.supliesOptions];
-
-      console.count();
+      (this.formGroup.get('SuppliesCheckArray') as FormArray).push(
+        this.createNewSupplyCheckArray()
+      );
+      this.existingOptions = true;
     });
   }
 
@@ -209,11 +257,11 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
         },
         Validators.required,
       ],
-      SuppliesCheck: this.formBuilder.array([]),
       PartialProduct: [false],
       Type: [null, [Validators.required]],
       ShowAllSupplies: [false],
       MinimumStock: [null, [Validators.required]],
+      SuppliesCheckArray: this.formBuilder.array([]),
     });
   }
 
@@ -222,20 +270,27 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (!this.suppliesChecked.length) {
-      this.snackBar.open('Tienes que elegir un insumo', 'Ok, elijo');
+    const supplies = this.getSuppliesCheckArray(this.formGroup);
+    const supplyToSave: any[] = [];
 
-      return;
-    }
+    supplies.forEach((suppliesChecked: any) => {
+      const supplyCheckedToSave: any[] = [];
 
-    const supplies = this.suppliesChecked.map((supplyChecked) => {
-      return {
-        _id: supplyChecked.IdSupply,
-        Quantity: supplyChecked.Quantity,
-      };
+      (suppliesChecked.get('SuppliesOptions') as FormArray).controls.forEach(
+        (sc) => {
+          if (sc.get('Checked')?.value) {
+            supplyCheckedToSave.push({
+              _id: sc.get('IdSupply')?.value,
+              Quantity: sc.get('Quantity')?.value,
+            });
+          }
+        }
+      );
+
+      supplyToSave.push(supplyCheckedToSave);
     });
 
-    const product = { ...this.formGroup.getRawValue(), Supplies: supplies };
+    const product = { ...this.formGroup.getRawValue(), Supplies: supplyToSave };
 
     if (this.formGroup.get('Id')?.value) {
       this.productService.updateProduct(product).subscribe(() => {});
@@ -266,18 +321,18 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
 
   changeSupplies(type: string): void {
     if (!this.controls('ShowAllSupplies').value) {
-      this.supliesOptionsFiltered = this.supliesOptions.filter(
+      this.suppliesOptionsFiltered = this.suppliesOptions.filter(
         (p) => p.Type === type
       );
     }
   }
 
   showAllSupplies(): void {
-    this.supliesOptionsFiltered = this.supliesOptions;
+    this.suppliesOptionsFiltered = this.suppliesOptions;
   }
 
   backToList(): void {
-    this.router.navigate(['/main/supplies/supplies']);
+    this.router.navigate(['/main/supplies/products']);
   }
 
   clearForm(): void {
@@ -333,38 +388,95 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
     qty?.updateValueAndValidity();
   }
 
-  filterSupply(type: string) {
+  filterSupply(type: string): void {
     this.typeSelected = type;
-    this.showContainer();
+    // this.showContainer();
 
-    this.getSuppliesCheckFormArray.controls.forEach((supply) => {
-      const supplyType = supply.get('Type')?.value;
-      const qty = supply.get('Quantity');
-      const supplyCheck = supply.get('Checked');
+    // this.getSuppliesCheckFormArray.controls.forEach((supply) => {
+    //   const supplyType = supply.get('Type')?.value;
+    //   const qty = supply.get('Quantity');
+    //   const supplyCheck = supply.get('Checked');
 
-      if (supplyType !== type) {
-        qty?.setValue(0);
-        supplyCheck?.setValue(false);
-        qty?.disable();
-        qty?.setValidators([]);
-      }
-    });
+    //   if (supplyType !== type) {
+    //     qty?.setValue(0);
+    //     supplyCheck?.setValue(false);
+    //     qty?.disable();
+    //     qty?.setValidators([]);
+    //   }
+    // });
   }
 
   showContainer() {
     switch (this.typeSelected) {
       case ProductSupplyType.Botella:
-        this.showErroSupply = this.bottleSupply < 1;
+        this.showErrorSupply = this.bottleSupply < 1;
         break;
 
       case ProductSupplyType.Damajuana:
-        this.showErroSupply = this.damajuanaSupply < 1;
+        this.showErrorSupply = this.demijohnSupply < 1;
         break;
 
       default:
-        this.showErroSupply = this.damajuanaSupply < 1 && this.bottleSupply < 1;
-
+        this.showErrorSupply = this.demijohnSupply < 1 && this.bottleSupply < 1;
         break;
     }
+  }
+
+  /**
+   * New new Way to do it
+   */
+
+  createNewSupplyCheckArray(): FormGroup {
+    if (this.suppliesOptions.length) {
+      const options = this.suppliesOptions.map((supply) => {
+        return this.formBuilder.group({
+          IdSupply: [supply._id ?? ''],
+          IsPartial: [supply.IsPartial ?? false],
+          Checked: [false],
+          Name: [{ value: supply.Name ?? '', disabled: true }],
+          Quantity: [{ value: 0, disabled: true }],
+          Type: [supply.Type ?? ''],
+        });
+      });
+
+      return this.formBuilder.group({
+        SuppliesOptions: this.formBuilder.array(options),
+      });
+    }
+
+    return this.formBuilder.group({
+      SuppliesOptions: this.formBuilder.array([
+        this.formBuilder.group({
+          IdSupply: [''],
+          IsPartial: [false],
+          Checked: [false],
+          Name: [{ value: '', disabled: true }],
+          Quantity: [{ value: 0, disabled: true }],
+          Type: [''],
+        }),
+      ]),
+    });
+  }
+
+  getSuppliesCheckArray(form: any) {
+    return form.controls.SuppliesCheckArray.controls;
+  }
+
+  getSuppliesOptionsArray(form: any) {
+    return form.controls.SuppliesOptions.controls;
+  }
+
+  addNewSupplyCheck() {
+    (this.formGroup.controls['SuppliesCheckArray'] as FormArray).push(
+      this.createNewSupplyCheckArray(),
+      { emitEvent: false }
+    );
+  }
+
+  deleteNewSupplyCheck(index: number) {
+    (this.formGroup.controls['SuppliesCheckArray'] as FormArray).removeAt(
+      index,
+      { emitEvent: false }
+    );
   }
 }

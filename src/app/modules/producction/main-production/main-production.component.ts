@@ -1,16 +1,17 @@
-import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Observable, Subject, forkJoin } from 'rxjs';
+
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { forkJoin, Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
-import { StockProduct } from 'src/app/shared/models/stock/product-supply.model';
-import { StockSupply } from 'src/app/shared/models/stock/stock-supply.model';
-import { ProductionNode } from 'src/app/shared/models/tree/producction-node.model';
+import { NestedTreeControl } from '@angular/cdk/tree';
 import { ProductService } from '../../supplies/services/product.service';
+import { ProductionNode } from 'src/app/shared/models/tree/producction-node.model';
+import { StockProduct } from 'src/app/shared/models/stock/product-supply.model';
 import { StockService } from '../../supplies/services/stock.service';
+import { StockSupply } from 'src/app/shared/models/stock/stock-supply.model';
 import { SupplyService } from '../../supplies/services/supply.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-production',
@@ -115,6 +116,10 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   generateProduction(nodeInfo: ProductionNode): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '600px',
+      data: {
+        confirmMessage: 'Si, a producir',
+        cancelMessage: 'No, por ahora no',
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

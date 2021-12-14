@@ -3,8 +3,8 @@
   <p>Esta seguro que desea producir?</p>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">No, mejor lo pienso</button>
+  <button mat-button (click)="onNoClick()">{{ data.cancelMessage }}</button>
   <button mat-button (click)="onConfirm()" cdkFocusInitial>
-    Si, a producir
+    {{ data.confirmMessage }}
   </button>
 </div>
