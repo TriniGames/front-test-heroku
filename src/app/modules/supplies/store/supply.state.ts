@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
-import { State, Selector, Action } from '@ngxs/store';
-import { StateContext } from '@ngxs/store';
-import { tap } from 'rxjs/operators';
-import { ProductService } from '../services/product.service';
-import { SupplyService } from '../services/supply.service';
+import { Action, Selector, State } from '@ngxs/store';
 import {
   GetPartialProducts,
   GetProduct,
   GetSupplies,
+  GetSuppliesWarning,
   GetSupply,
 } from './supply.actions';
+
+import { Injectable } from '@angular/core';
+import { ProductService } from '../services/product.service';
+import { StateContext } from '@ngxs/store';
+import { SupplyService } from '../services/supply.service';
+import { tap } from 'rxjs/operators';
 
 export interface Supply {
   supplies: any[];
@@ -117,7 +119,7 @@ export class SupplyState {
   }
 
   @Action(GetProduct)
-  GetProduct(context: StateContext<Supply>, action: GetProduct) {
+  getProduct(context: StateContext<Supply>, action: GetProduct) {
     return this.productService.getProduct(action.Id).pipe(
       tap(
         (resp) => {
@@ -132,6 +134,19 @@ export class SupplyState {
           console.error('error', error);
         }
       )
+    );
+  }
+
+  @Action(GetSuppliesWarning)
+  getSuppliesWarning(context: StateContext<Supply>, action: GetSupplies) {
+    return this.supplyService.getSuppliesAndPartialProducts().pipe(
+      tap((resp) => {
+        context.patchState({
+          warningSupplies: resp.supply.filter(
+            (s: any) => s.Stock <= s.MinimumStock
+          ),
+        });
+      })
     );
   }
 

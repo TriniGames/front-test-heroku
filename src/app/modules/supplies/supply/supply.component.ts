@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from '@angular/cdk/a11y';
 import {
   AfterViewInit,
   Component,
@@ -6,17 +5,19 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { GetSupplies, GetSuppliesWarning } from '../store/supply.actions';
 import { MatSort, Sort } from '@angular/material/sort';
+
+import EnumHelper from 'src/app/shared/helpers/enum.helper';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { StockService } from '../services/stock.service';
 import { Store } from '@ngxs/store';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import EnumHelper from 'src/app/shared/helpers/enum.helper';
 import { Supply } from 'src/app/shared/models/supplies/supply.model';
-import { StockService } from '../services/stock.service';
 import { SupplyService } from '../services/supply.service';
-import { GetSupplies } from '../store/supply.actions';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-supply',
@@ -101,6 +102,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (supply) => {
+          this.store.dispatch(new GetSuppliesWarning());
           this.dataSource.find((ds) => ds._id === id)!.Stock = supply.Stock;
           this.stockToAdd = 0;
           this.savingStock = false;
@@ -128,6 +130,7 @@ export class SupplyComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (supply) => {
+          this.store.dispatch(new GetSuppliesWarning());
           const supplyFound = this.dataSource.find((ds) => ds._id === id);
 
           if (supplyFound) {

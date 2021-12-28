@@ -1,17 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject, forkJoin } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { ProductService } from '../../supplies/services/product.service';
-import { ProductionNode } from 'src/app/shared/models/tree/producction-node.model';
+import { ProductionNode } from 'src/app/shared/models/tree/production-node.model';
 import { StockProduct } from 'src/app/shared/models/stock/product-supply.model';
 import { StockService } from '../../supplies/services/stock.service';
 import { StockSupply } from 'src/app/shared/models/stock/stock-supply.model';
 import { SupplyService } from '../../supplies/services/supply.service';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-production',
@@ -31,7 +31,7 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   partialProducts = [];
   production: any;
   productionOnGoing = false;
-  maximumProductionPosibleExcedeed = false;
+  maximumProductionPossibleExceeded = false;
   error = 'No se puede producir mas de lo que esta permitido';
 
   constructor(
@@ -62,8 +62,8 @@ export class MainProductionComponent implements OnInit, OnDestroy {
       return this.productionOnGoing;
     }
 
-    if (this.maximumProductionPosibleExcedeed) {
-      return this.maximumProductionPosibleExcedeed;
+    if (this.maximumProductionPossibleExceeded) {
+      return this.maximumProductionPossibleExceeded;
     }
 
     let itIsToProduce = false;
@@ -84,6 +84,12 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   }
 
   evaluateStock(e: any, node: ProductionNode): void {
+    console.log({
+      toProduce: e.target.value,
+      dataSourceDamajuanas: this.dataSourceDamajuanas.data,
+      dataSourceBottles: this.dataSourceBottles.data,
+    });
+
     const itemToProduce = this.itemsToProduce.find(
       (item) => item.idProduct === node.idProduct
     );
@@ -92,25 +98,9 @@ export class MainProductionComponent implements OnInit, OnDestroy {
       itemToProduce.quantityToProduce = e.target.value;
     }
 
-    this.dataSourceDamajuanas.data.forEach((nodeToUpdate) => {
-      nodeToUpdate.children!.forEach((child: ProductionNode) => {
-        if (child.stock! < e.target.value) {
-          this.maximumProductionPosibleExcedeed = true;
-        } else {
-          this.maximumProductionPosibleExcedeed = false;
-        }
-      });
-    });
+    const stock = node?.stock || 0;
 
-    this.dataSourceBottles.data.forEach((nodeToUpdate) => {
-      nodeToUpdate.children!.forEach((child: ProductionNode) => {
-        if (child.stock! < e.target.value) {
-          this.maximumProductionPosibleExcedeed = true;
-        } else {
-          this.maximumProductionPosibleExcedeed = false;
-        }
-      });
-    });
+    this.maximumProductionPossibleExceeded = e.target.value > stock;
   }
 
   generateProduction(nodeInfo: ProductionNode): void {
@@ -153,78 +143,75 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   getProducts(): void {
     this.productService
       .getProducts()
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(take(1))
       .subscribe((resp) => {
         this.supplyService
-          .getSupplies()
+          .getSuppliesAndPartialProducts()
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe((supplies) => {
-            this.productService
-              .getPartialProducts()
-              .pipe(takeUntil(this.unsubscribe$))
-              .subscribe((partialProducts) => {
-                this.supplies = supplies.supply;
-                this.partialProducts = partialProducts.product;
+            this.supplies = supplies.supply;
 
-                let bottles: any[] = [];
+            let bottles: any[] = [];
 
-                resp.product.forEach((product: any, index: number) => {
-                  const suppliesParsed = JSON.parse(product.Supplies);
+            resp.product.forEach((product: any, index: number) => {
+              const suppliesParsed = JSON.parse(product.Supplies);
 
-                  const stockAvailables =
-                    this.getStockAvailable(suppliesParsed);
+              const stockAvailable = this.getStockAvailable(suppliesParsed);
 
-                  const minStock = stockAvailables.reduce(function (
-                    prev,
-                    curr
-                  ) {
-                    return prev.Stock < curr.Stock ? prev : curr;
-                  }).Stock;
+              console.log({ stockAvailable });
 
-                  const children = {
-                    name: suppliesParsed
-                      .map((sp: any) => {
-                        return this.getSupplyName(
-                          sp._id,
-                          partialProducts.product,
-                          supplies.supply
-                        );
+              // const minStock = stockAvailable.reduce((prev, curr) => {
+              //   return prev.Stock < curr.Stock ? prev : curr;
+              // }).Stock;
+
+              const minStock = stockAvailable.reduce((prev, curr) => {
+                return Math.trunc(prev.Stock / prev.Quantity) <
+                  Math.trunc(curr.Stock / curr.Quantity)
+                  ? prev
+                  : curr;
+              }).Stock;
+
+              const children = {
+                name: suppliesParsed
+                  .map((sp: any) => {
+                    return sp
+                      .map((sup: any) => {
+                        return this.getSupplyName(sup._id, supplies.supply);
                       })
-                      .join(' - '),
-                    ids: suppliesParsed
-                      .map((sp: any) => {
-                        return sp._id;
-                      })
-                      .join(' - '),
-                    idProduct: product._id,
-                    index,
-                    stock: minStock,
-                    stockDetail: stockAvailables
-                      .map((sa) => {
-                        return `${sa.Name} - ${sa.Stock}`;
-                      })
-                      .join(' / '),
-                  };
+                      .join(' - ');
+                  })
+                  .join(' - '),
+                ids: suppliesParsed
+                  .map((sp: any) => {
+                    return sp._id;
+                  })
+                  .join(' - '),
+                idProduct: product._id,
+                index,
+                stock: minStock,
+                stockDetail: stockAvailable
+                  .map((sa) => {
+                    return `${sa.Name} - ${sa.Stock}`;
+                  })
+                  .join(' / '),
+              };
 
-                  //Damajuana
-                  if (product.Type == 1) {
-                    this.treeProductionDamajuanaData.push({
-                      name: product.Name,
-                      children: [children],
-                    });
-                  } else {
-                    this.treeProductionBottleData.push({
-                      name: product.Name,
-                      children: [children],
-                    });
-                  }
+              if (product.Type == 1) {
+                this.treeProductionDamajuanaData.push({
+                  name: product.Name,
+                  children: [children],
                 });
+              } else {
+                this.treeProductionBottleData.push({
+                  name: product.Name,
+                  children: [children],
+                });
+              }
+            });
 
-                this.dataSourceDamajuanas.data =
-                  this.treeProductionDamajuanaData;
+            this.dataSourceDamajuanas.data = this.treeProductionDamajuanaData;
 
-                this.dataSourceBottles.data = this.treeProductionBottleData;
-              });
+            this.dataSourceBottles.data = this.treeProductionBottleData;
           });
       });
   }
@@ -233,19 +220,11 @@ export class MainProductionComponent implements OnInit, OnDestroy {
     const stocks: any[] = [];
 
     ids.forEach((supplyDetails) => {
-      const supply: any = this.supplies.find(
-        (s: any) => s._id === supplyDetails._id
-      );
+      supplyDetails.forEach((sd: any) => {
+        const supply: any = this.supplies.find((s: any) => s._id === sd._id);
 
-      if (supply) {
-        stocks.push(supply);
-      } else {
-        const partialProduct: any = this.partialProducts.find(
-          (s: any) => s._id === supplyDetails._id
-        );
-
-        stocks.push(partialProduct);
-      }
+        stocks.push({ ...supply, Quantity: sd.Quantity });
+      });
     });
 
     // if (stocks && stocks.length) {
@@ -263,17 +242,7 @@ export class MainProductionComponent implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
   }
 
-  private getSupplyName(
-    id: string,
-    partialProducts: any[],
-    supplies: any[]
-  ): string {
-    const partialProduct = partialProducts.find((p) => p._id === id);
-
-    if (partialProduct) {
-      return partialProduct.Name;
-    }
-
+  private getSupplyName(id: string, supplies: any[]): string {
     return supplies.find((p) => p._id === id).Name;
   }
 

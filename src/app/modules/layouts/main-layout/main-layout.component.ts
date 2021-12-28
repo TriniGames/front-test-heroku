@@ -1,11 +1,14 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
+import {
+  GetSupplies,
+  GetSuppliesWarning,
+} from '../../supplies/store/supply.actions';
 import { Observable, Subject, take } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
 
 import { AuthenticateState } from '../../authenticate/store/authenticate.state';
-import { GetSupplies } from '../../supplies/store/supply.actions';
-import { Signout } from '../../authenticate/store/authenticate.actions';
+import { SignOut } from '../../authenticate/store/authenticate.actions';
 import { SupplyState } from '../../supplies/store/supply.state';
 
 @Component({
@@ -30,7 +33,7 @@ export class MainLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(new GetSupplies());
+    this.store.dispatch(new GetSuppliesWarning());
 
     this.getUserInformation();
     this.getWarningSupplies();
@@ -46,14 +49,14 @@ export class MainLayoutComponent implements OnInit {
   }
 
   getWarningSupplies(): void {
-    this.warningSupplies$.pipe(take(1)).subscribe((ws) => {
+    this.warningSupplies$.subscribe((ws) => {
       this.warningSupplies = ws;
       this.qtyOfWarnings = this.warningSupplies.length;
     });
   }
 
   logout(): void {
-    this.store.dispatch(new Signout()).subscribe((success) => {
+    this.store.dispatch(new SignOut()).subscribe(() => {
       this.router.navigate(['/auth']);
     });
   }

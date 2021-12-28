@@ -11,6 +11,6 @@ export class GetLogin {
   constructor(public loginInfo: LoginInfo) {}
 }
 
-export class Signout {
-  static readonly type = '[AUTHENTICATE] Signout';
+export class SignOut {
+  static readonly type = '[AUTHENTICATE] SignOut';
 }

@@ -1,18 +1,19 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material/sort';
 import { Observable, Subject } from 'rxjs';
+import { Select, Store } from '@ngxs/store';
 import { take, takeUntil } from 'rxjs/operators';
 
 import { AuthenticateState } from '../../authenticate/store/authenticate.state';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import EnumHelper from 'src/app/shared/helpers/enum.helper';
+import { GetSuppliesWarning } from '../store/supply.actions';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { Product } from 'src/app/shared/models/supplies/product.model';
 import { ProductService } from '../services/product.service';
 import { Router } from '@angular/router';
-import { Select } from '@ngxs/store';
 import { StockService } from '../services/stock.service';
 
 @Component({
@@ -49,7 +50,8 @@ export class ProductComponent implements OnInit, OnDestroy {
     private readonly liveAnnouncer: LiveAnnouncer,
     private readonly productService: ProductService,
     private readonly router: Router,
-    private readonly stockService: StockService
+    private readonly stockService: StockService,
+    private readonly store: Store
   ) {}
 
   ngOnInit(): void {
@@ -102,6 +104,8 @@ export class ProductComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (product) => {
+          this.store.dispatch(new GetSuppliesWarning());
+
           const productFound = this.dataSource.find(
             (ds: Product) => ds._id === id
           );
@@ -143,6 +147,8 @@ export class ProductComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (product) => {
+          this.store.dispatch(new GetSuppliesWarning());
+
           const productFound = this.dataSource.find(
             (ds: Product) => ds._id === id
           );

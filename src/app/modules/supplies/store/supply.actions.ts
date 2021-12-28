@@ -17,3 +17,8 @@ export class GetPartialProducts {
   static readonly type = '[AUTHENTICATE] Get Partial Products ';
   constructor() {}
 }
+
+export class GetSuppliesWarning {
+  static readonly type = '[AUTHENTICATE] Get Supplies Warning ';
+  constructor() {}
+}

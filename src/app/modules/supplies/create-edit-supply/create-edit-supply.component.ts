@@ -1,17 +1,18 @@
+import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import {
+  FormBuilder,
+  FormControl,
   FormGroup,
   Validators,
-  FormControl,
-  FormBuilder,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
+import { GetSuppliesWarning, GetSupply } from '../store/supply.actions';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Select, Store } from '@ngxs/store';
+
 import { SupplyService } from '../services/supply.service';
-import { GetSupply } from '../store/supply.actions';
 import { SupplyState } from '../store/supply.state';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-create-edit-supply',
@@ -93,11 +94,14 @@ export class CreateEditSupplyComponent implements OnInit {
     if (this.formGroup.get('Id')?.value) {
       this._supplyService
         .updateSupply(this.formGroup.getRawValue())
-        .subscribe(() => {});
+        .subscribe(() => {
+          this._store.dispatch(new GetSuppliesWarning());
+        });
     } else {
       this._supplyService
         .createSupply(this.formGroup.getRawValue())
         .subscribe((supplyCreated) => {
+          this._store.dispatch(new GetSuppliesWarning());
           this._router.navigate([], {
             relativeTo: this._route,
             queryParams: {

@@ -8,7 +8,11 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { GetProduct, GetSupplies } from '../store/supply.actions';
+import {
+  GetProduct,
+  GetSupplies,
+  GetSuppliesWarning,
+} from '../store/supply.actions';
 import { Observable, Subject } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
 import { take, takeUntil } from 'rxjs/operators';
@@ -293,9 +297,12 @@ export class CreateEditProductComponent implements OnInit, OnDestroy {
     const product = { ...this.formGroup.getRawValue(), Supplies: supplyToSave };
 
     if (this.formGroup.get('Id')?.value) {
-      this.productService.updateProduct(product).subscribe(() => {});
+      this.productService.updateProduct(product).subscribe(() => {
+        this.store.dispatch(new GetSuppliesWarning());
+      });
     } else {
       this.productService.createProduct(product).subscribe((productCreated) => {
+        this.store.dispatch(new GetSuppliesWarning());
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: {

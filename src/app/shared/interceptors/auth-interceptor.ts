@@ -5,15 +5,15 @@ import {
   HttpInterceptor,
   HttpRequest,
 } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store } from '@ngxs/store';
 import { Observable, Subscription, throwError } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { AuthenticateService } from 'src/app/modules/authenticate/services/authenticate.service';
-import { Signout } from 'src/app/modules/authenticate/store/authenticate.actions';
+
 import { AuthenticateState } from 'src/app/modules/authenticate/store/authenticate.state';
+import { Injectable } from '@angular/core';
 import { LoaderService } from '../services/loader-services';
+import { Router } from '@angular/router';
+import { SignOut } from 'src/app/modules/authenticate/store/authenticate.actions';
+import { Store } from '@ngxs/store';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -58,7 +58,7 @@ export class AuthInterceptor implements HttpInterceptor {
         this.removeRequest(req);
       }),
       catchError((error) => {
-        this.store.dispatch(new Signout()).subscribe((success) => {
+        this.store.dispatch(new SignOut()).subscribe(() => {
           this.router.navigate(['/auth']);
         });
         return throwError(() => error);
