@@ -84,12 +84,6 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   }
 
   evaluateStock(e: any, node: ProductionNode): void {
-    console.log({
-      toProduce: e.target.value,
-      dataSourceDamajuanas: this.dataSourceDamajuanas.data,
-      dataSourceBottles: this.dataSourceBottles.data,
-    });
-
     const itemToProduce = this.itemsToProduce.find(
       (item) => item.idProduct === node.idProduct
     );
@@ -115,27 +109,48 @@ export class MainProductionComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.productionOnGoing = true;
+
+        const indexToProduce = nodeInfo.children
+          ? nodeInfo.children[0].index
+          : 0;
+
         const production = this.itemsToProduce.find(
-          (items) => items.index !== nodeInfo.index
+          (itp) => itp.index === indexToProduce
         );
+
+        // console.log({
+        //   nodeInfo,
+        //   itemsToProduce: this.itemsToProduce,
+        //   production,
+        // });
+
         const supplies: string[] = [];
         const partialProducts: string[] = [];
-        production!.ids!.forEach((supply) => {
-          const supplyToConsume: any = this.supplies.find(
-            (p: any) => p._id === supply
-          );
-          if (supplyToConsume) {
-            supplies.push(supplyToConsume._id);
-          } else {
-            const partialProductToConsume: any = this.partialProducts.find(
-              (p: any) => p._id === supply
+
+        if (production) {
+          production!.ids!.forEach((supply) => {
+            const supplyToConsume: any = this.supplies.find(
+              (p: any) => p._id === supply._id
             );
-            if (partialProductToConsume) {
-              partialProducts.push(partialProductToConsume._id);
+
+            if (supplyToConsume) {
+              supplies.push({ ...supplyToConsume, Quantity: supply.Quantity });
+            } else {
+              const partialProductToConsume: any = this.partialProducts.find(
+                (p: any) => p._id === supply._id
+              );
+
+              if (partialProductToConsume) {
+                partialProducts.push({
+                  ...partialProductToConsume,
+                  Quantity: partialProductToConsume.Quantity,
+                });
+              }
             }
-          }
+          });
+
           this.consumeStock(supplies, partialProducts, production);
-        });
+        }
       }
     });
   }
@@ -151,60 +166,51 @@ export class MainProductionComponent implements OnInit, OnDestroy {
           .subscribe((supplies) => {
             this.supplies = supplies.supply;
 
-            let bottles: any[] = [];
-
             resp.product.forEach((product: any, index: number) => {
-              const suppliesParsed = JSON.parse(product.Supplies);
+              const suppliesParsedList = JSON.parse(product.Supplies);
+              const childrens: any[] = [];
 
-              const stockAvailable = this.getStockAvailable(suppliesParsed);
+              suppliesParsedList.forEach((suppliesParsed: any) => {
+                const stockAvailable = this.getStockAvailable(suppliesParsed);
 
-              console.log({ stockAvailable });
+                const minStockSupply = stockAvailable.reduce((prev, curr) => {
+                  return Math.trunc(prev.Stock / parseInt(prev.Quantity)) <
+                    Math.trunc(curr.Stock / parseInt(curr.Quantity))
+                    ? prev
+                    : curr;
+                });
 
-              // const minStock = stockAvailable.reduce((prev, curr) => {
-              //   return prev.Stock < curr.Stock ? prev : curr;
-              // }).Stock;
+                const children = {
+                  name: suppliesParsed
+                    .map((sp: any) => {
+                      return this.getSupplyName(sp._id, supplies.supply);
+                    })
+                    .join(' - '),
+                  ids: suppliesParsed,
+                  idProduct: product._id,
+                  index,
+                  stock: Math.trunc(
+                    minStockSupply.Stock / minStockSupply.Quantity
+                  ),
+                  stockDetail: stockAvailable
+                    .map((sa) => {
+                      return `${sa.Name} - ${sa.Stock}`;
+                    })
+                    .join(' / '),
+                };
 
-              const minStock = stockAvailable.reduce((prev, curr) => {
-                return Math.trunc(prev.Stock / prev.Quantity) <
-                  Math.trunc(curr.Stock / curr.Quantity)
-                  ? prev
-                  : curr;
-              }).Stock;
-
-              const children = {
-                name: suppliesParsed
-                  .map((sp: any) => {
-                    return sp
-                      .map((sup: any) => {
-                        return this.getSupplyName(sup._id, supplies.supply);
-                      })
-                      .join(' - ');
-                  })
-                  .join(' - '),
-                ids: suppliesParsed
-                  .map((sp: any) => {
-                    return sp._id;
-                  })
-                  .join(' - '),
-                idProduct: product._id,
-                index,
-                stock: minStock,
-                stockDetail: stockAvailable
-                  .map((sa) => {
-                    return `${sa.Name} - ${sa.Stock}`;
-                  })
-                  .join(' / '),
-              };
+                childrens.push(children);
+              });
 
               if (product.Type == 1) {
                 this.treeProductionDamajuanaData.push({
                   name: product.Name,
-                  children: [children],
+                  children: childrens,
                 });
               } else {
                 this.treeProductionBottleData.push({
                   name: product.Name,
-                  children: [children],
+                  children: childrens,
                 });
               }
             });
@@ -220,16 +226,12 @@ export class MainProductionComponent implements OnInit, OnDestroy {
     const stocks: any[] = [];
 
     ids.forEach((supplyDetails) => {
-      supplyDetails.forEach((sd: any) => {
-        const supply: any = this.supplies.find((s: any) => s._id === sd._id);
+      const supply: any = this.supplies.find(
+        (s: any) => s._id === supplyDetails._id
+      );
 
-        stocks.push({ ...supply, Quantity: sd.Quantity });
-      });
+      stocks.push({ ...supply, Quantity: supplyDetails.Quantity });
     });
-
-    // if (stocks && stocks.length) {
-    //   return Math.min(...stocks);
-    // }
 
     return stocks;
   }
@@ -247,17 +249,21 @@ export class MainProductionComponent implements OnInit, OnDestroy {
   }
 
   private consumeStock(
-    supplies: string[],
-    partialProducts: string[],
+    supplies: any[],
+    partialProducts: any[],
     production: any
   ): void {
+    console.log({ supplies, partialProducts, production });
     const subs: Observable<any>[] = [];
 
     if (supplies && supplies.length) {
       supplies.forEach((supply) => {
         subs.push(
           this.stockService.addStockSupply(
-            new StockSupply(-Number(production.quantityToProduce), supply)
+            new StockSupply(
+              -Number(production.quantityToProduce * supply.Quantity),
+              supply._id
+            )
           )
         );
       });
@@ -268,8 +274,8 @@ export class MainProductionComponent implements OnInit, OnDestroy {
         subs.push(
           this.stockService.addStockProduct(
             new StockProduct(
-              -Number(production.quantityToProduce),
-              partialProduct
+              -Number(production.quantityToProduce * partialProduct.Quantity),
+              partialProduct._id
             )
           )
         );

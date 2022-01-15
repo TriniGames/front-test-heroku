@@ -20,7 +20,9 @@
       <!-- There is inline padding applied to this node using styles.
       This padding value depends on the mat-icon-button width. -->
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <mat-checkbox (change)="checkSuppliesToProduce($event, node)"
+        <mat-checkbox
+          [disabled]="node.stock < 1"
+          (change)="checkSuppliesToProduce($event, node)"
           >{{ node.name }} ({{ node.stock }})</mat-checkbox
         >
         <button
@@ -109,7 +111,9 @@
       <!-- There is inline padding applied to this node using styles.
     This padding value depends on the mat-icon-button width. -->
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <mat-checkbox (change)="checkSuppliesToProduce($event, node)"
+        <mat-checkbox
+          [disabled]="node.stock < 1"
+          (change)="checkSuppliesToProduce($event, node)"
           >{{ node.name }} ({{ node.stock }})</mat-checkbox
         >
         <mat-form-field

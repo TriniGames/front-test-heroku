@@ -2,7 +2,7 @@ export interface ProductionNode {
   name: string;
   children?: ProductionNode[];
   node?: any;
-  ids?: string[];
+  ids?: any[];
   idProduct?: string;
   index?: number;
   stock?: number;
