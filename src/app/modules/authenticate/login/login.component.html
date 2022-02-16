@@ -15,15 +15,15 @@
     </small>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
+                <label for="password">Contraseña</label>
                 <input formControlName="password" id="password" type="password" />
                 <small class="text-danger" *ngIf="!loginForm.get('password')!.valid && loginForm.get('password')!.touched">
         El campo es requerido.
     </small>
             </div>
             <div class="buttons">
-                <button class="login-button" [ngClass]="{'disabled': loginForm.invalid}" type="submit">Login</button>
-                <a class="login-link" href="/auth/reset-password">Forgot Password?</a>
+                <button class="login-button" [ngClass]="{'disabled': loginForm.invalid}" type="submit">Ingresar</button>
+                <!-- <a class="login-link" href="/auth/reset-password">Forgot Password?</a> -->
             </div>
         </form>
     </div>

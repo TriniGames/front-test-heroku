@@ -14,26 +14,13 @@ import { LoaderService } from '../services/loader-services';
 import { Router } from '@angular/router';
 import { SignOut } from 'src/app/modules/authenticate/store/authenticate.actions';
 import { Store } from '@ngxs/store';
+import { ShowLoaderAction, HideLoaderAction } from '../store/loader.actions';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private requests: HttpRequest<any>[] = [];
   private subscriptions: Subscription[] = [];
-  constructor(
-    private readonly loaderService: LoaderService,
-    private readonly store: Store,
-    private readonly router: Router
-  ) {}
-
-  removeRequest(req: HttpRequest<any>) {
-    const i = this.requests.indexOf(req);
-
-    if (i >= 0) {
-      this.requests.splice(i, 1);
-      // this.subscriptions[i].unsubscribe();
-      // this.subscriptions.splice(i, 1);
-    }
-  }
+  constructor(private readonly store: Store, private readonly router: Router) {}
 
   intercept(
     req: HttpRequest<any>,
@@ -41,7 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     const token = this.store.selectSnapshot(AuthenticateState.token);
 
-    // this.subscriptions.push(this.loaderService.spinner$.subscribe());
+    this.store.dispatch(new ShowLoaderAction());
 
     if (!req.url.includes('user/login')) {
       req = req.clone({
@@ -51,16 +38,13 @@ export class AuthInterceptor implements HttpInterceptor {
       });
     }
 
-    this.requests.push(req);
-
     return next.handle(req).pipe(
-      finalize(() => {
-        this.removeRequest(req);
-      }),
+      finalize(() => this.store.dispatch(new HideLoaderAction())),
       catchError((error) => {
         this.store.dispatch(new SignOut()).subscribe(() => {
           this.router.navigate(['/auth']);
         });
+        this.store.dispatch(new HideLoaderAction());
         return throwError(() => error);
       })
     );

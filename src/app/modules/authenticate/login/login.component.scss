@@ -7,11 +7,7 @@
   width: 100%;
   min-height: 600px;
   height: 100vh;
-  background-image: linear-gradient(
-    45deg,
-    $background-color,
-    $background-color
-  );
+  background-color: rgba($background-color, 0.9);
   outline: 5px solid #a89068;
   outline-offset: -30px;
   .login-form {

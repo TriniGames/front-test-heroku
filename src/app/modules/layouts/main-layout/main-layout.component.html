@@ -36,7 +36,11 @@
 </mat-toolbar>
 
 <mat-sidenav-container>
-  <mat-sidenav #sidenav="matSidenav" class="mat-elevation-z8">
+  <mat-sidenav
+    #sidenav="matSidenav"
+    class="mat-elevation-z8"
+    style="overflow-x: hidden"
+  >
     <img
       class="avatar mat-elevation-z8"
       ngxGravatar
@@ -83,7 +87,7 @@
     <mat-divider></mat-divider>
 
     <button mat-button class="menu-button" (click)="logout()">
-      <mat-icon>logout</mat-icon>
+      <mat-icon>exit_to_app</mat-icon>
       <span>Logout</span>
     </button>
   </mat-sidenav>
@@ -105,3 +109,5 @@
     </ng-template>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<app-spinner *ngIf="loadingStatus$ | async"></app-spinner>

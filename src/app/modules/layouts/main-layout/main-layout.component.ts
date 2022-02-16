@@ -10,6 +10,7 @@ import { Select, Store } from '@ngxs/store';
 import { AuthenticateState } from '../../authenticate/store/authenticate.state';
 import { SignOut } from '../../authenticate/store/authenticate.actions';
 import { SupplyState } from '../../supplies/store/supply.state';
+import { LoaderState } from 'src/app/shared/store/loader.state';
 
 @Component({
   selector: 'app-main-layout',
@@ -25,7 +26,9 @@ export class MainLayoutComponent implements OnInit {
   userInformation: any;
   showMainContent = true;
   qtyOfWarnings = 0;
-
+  @Select(LoaderState.status)
+  loadingStatus$: Observable<boolean>;
+  
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
