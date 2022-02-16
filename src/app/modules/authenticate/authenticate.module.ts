@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthenticateRoutingModule } from './authenticate-routing.module';
 import { NgxsModule } from '@ngxs/store';
 import { AuthenticateState } from './store/authenticate.state';
+import { SpinnerModule } from 'src/app/shared/components/spinner/spinner.module';
 
 @NgModule({
   declarations: [LoginComponent],
@@ -14,6 +15,7 @@ import { AuthenticateState } from './store/authenticate.state';
     ReactiveFormsModule,
     AuthenticateRoutingModule,
     NgxsModule.forFeature([AuthenticateState]),
+    SpinnerModule,
   ],
 })
 export class AuthenticateModule {}

@@ -1,5 +1,10 @@
 import { Action, Selector, State } from '@ngxs/store';
-import { GetLogin, SetUserInformation, SignOut } from './authenticate.actions';
+import {
+  GetLogin,
+  InvalidLogin,
+  SetUserInformation,
+  SignOut,
+} from './authenticate.actions';
 
 import { AuthenticateService } from '../services/authenticate.service';
 import { Injectable } from '@angular/core';
@@ -9,12 +14,14 @@ import { tap } from 'rxjs/operators';
 
 export interface Authentication {
   userInformation: UserInformation | null;
+  invalidLogin: boolean;
 }
 
 @State<Authentication>({
   name: 'authenticate',
   defaults: {
     userInformation: null,
+    invalidLogin: false,
   },
 })
 @Injectable()
@@ -24,6 +31,11 @@ export class AuthenticateState {
   @Selector()
   static token(state: Authentication): string {
     return state.userInformation?.jwt ?? '';
+  }
+
+  @Selector()
+  static selectInvalidLogin(state: Authentication) {
+    return state.invalidLogin;
   }
 
   @Selector()
@@ -56,8 +68,15 @@ export class AuthenticateState {
   signOut(context: StateContext<Authentication>) {
     return this.authenticateService.signout().pipe(
       tap((_) => {
-        context.setState({ userInformation: null });
+        context.patchState({ userInformation: null });
       })
     );
+  }
+
+  @Action(InvalidLogin)
+  invalidLogin(context: StateContext<Authentication>, action: InvalidLogin) {
+    context.patchState({
+      invalidLogin: action.invalidLoginAttemp,
+    });
   }
 }

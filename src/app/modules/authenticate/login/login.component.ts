@@ -12,7 +12,8 @@ import { takeUntil } from 'rxjs/operators';
 import { regEx } from 'src/app/shared/constants';
 import { LoginInfo } from 'src/app/shared/models/authenticate/login-info.model';
 import { UserInformation } from 'src/app/shared/models/authenticate/user-information.model';
-import { GetLogin } from '../store/authenticate.actions';
+import { LoaderState } from 'src/app/shared/store/loader.state';
+import { GetLogin, InvalidLogin } from '../store/authenticate.actions';
 import { AuthenticateState } from '../store/authenticate.state';
 
 @Component({
@@ -23,8 +24,12 @@ import { AuthenticateState } from '../store/authenticate.state';
 export class LoginComponent implements OnInit, OnDestroy {
   @Select(AuthenticateState.selectUserInformation)
   userInfomation$!: Observable<UserInformation>;
+  @Select(AuthenticateState.selectInvalidLogin)
+  invalidLogin$!: Observable<boolean>;
   unsubscribe$ = new Subject();
   loginForm!: FormGroup;
+  @Select(LoaderState.status)
+  loadingStatus$: Observable<boolean>;
 
   constructor(
     private fb: FormBuilder,
@@ -34,6 +39,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initForm();
+    this.store.dispatch(new InvalidLogin(false));
     this.userInfomation$.pipe(takeUntil(this.unsubscribe$)).subscribe((ui) => {
       if (ui && ui.jwt) {
         this.router.navigate(['/main']);

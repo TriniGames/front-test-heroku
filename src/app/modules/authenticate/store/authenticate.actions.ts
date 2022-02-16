@@ -14,3 +14,8 @@ export class GetLogin {
 export class SignOut {
   static readonly type = '[AUTHENTICATE] SignOut';
 }
+
+export class InvalidLogin {
+  static readonly type = '[AUTHENTICATE] InvalidLogin';
+  constructor(public invalidLoginAttemp: boolean) {}
+}

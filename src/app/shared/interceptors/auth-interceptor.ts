@@ -12,7 +12,10 @@ import { AuthenticateState } from 'src/app/modules/authenticate/store/authentica
 import { Injectable } from '@angular/core';
 import { LoaderService } from '../services/loader-services';
 import { Router } from '@angular/router';
-import { SignOut } from 'src/app/modules/authenticate/store/authenticate.actions';
+import {
+  InvalidLogin,
+  SignOut,
+} from 'src/app/modules/authenticate/store/authenticate.actions';
 import { Store } from '@ngxs/store';
 import { ShowLoaderAction, HideLoaderAction } from '../store/loader.actions';
 
@@ -45,7 +48,11 @@ export class AuthInterceptor implements HttpInterceptor {
           this.router.navigate(['/auth']);
         });
         this.store.dispatch(new HideLoaderAction());
-        return throwError(() => error);
+        this.store.dispatch(new InvalidLogin(false));
+        return throwError(() => {
+          this.store.dispatch(new InvalidLogin(true));
+          return error;
+        });
       })
     );
   }
